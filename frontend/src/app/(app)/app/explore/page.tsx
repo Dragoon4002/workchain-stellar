@@ -40,6 +40,7 @@ export default function ExplorePage() {
         tags: ['On-Chain'],
         status: 'open',
         milestones: [],
+        startingPrice: Number(raw.budget) / 10_000_000,
       }
       setChainJobs([chainJob])
     } catch {} // ponytail: swallow silently; chain may not have job #1
@@ -68,31 +69,31 @@ export default function ExplorePage() {
             placeholder="Search jobs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500"
+            className="pl-10 bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-full sm:w-44 bg-slate-800 border-slate-700 text-slate-200">
+          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-slate-200">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
+          <SelectContent className="bg-white/5 border-white/8">
             {CATEGORIES.map((c) => (
-              <SelectItem key={c} value={c} className="text-slate-200 focus:bg-slate-700">{c}</SelectItem>
+              <SelectItem key={c} value={c} className="text-slate-200 focus:bg-white/8">{c}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="w-full sm:w-44 bg-slate-800 border-slate-700 text-slate-200">
+          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-slate-200">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
-            <SelectItem value="newest" className="text-slate-200 focus:bg-slate-700">Newest first</SelectItem>
-            <SelectItem value="budget_high" className="text-slate-200 focus:bg-slate-700">Budget: High to Low</SelectItem>
-            <SelectItem value="budget_low" className="text-slate-200 focus:bg-slate-700">Budget: Low to High</SelectItem>
+          <SelectContent className="bg-white/5 border-white/8">
+            <SelectItem value="newest" className="text-slate-200 focus:bg-white/8">Newest first</SelectItem>
+            <SelectItem value="budget_high" className="text-slate-200 focus:bg-white/8">Budget: High to Low</SelectItem>
+            <SelectItem value="budget_low" className="text-slate-200 focus:bg-white/8">Budget: Low to High</SelectItem>
           </SelectContent>
         </Select>
         {address && (
-          <Button onClick={loadFromChain} variant="outline" className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 whitespace-nowrap">
+          <Button onClick={loadFromChain} variant="outline" className="border-white/20 text-[#dddddd] hover:bg-white/8 whitespace-nowrap">
             Load on-chain jobs
           </Button>
         )}
@@ -101,7 +102,7 @@ export default function ExplorePage() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-52 bg-slate-800 rounded-xl" />
+            <Skeleton key={i} className="h-52 bg-white/5 rounded-xl" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
