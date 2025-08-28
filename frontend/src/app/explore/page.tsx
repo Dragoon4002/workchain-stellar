@@ -3,18 +3,47 @@
 import { useState } from 'react'
 import { JobCard } from '@/components/job-card'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { MOCK_JOBS } from '@/lib/mock-data'
+import { MOCK_JOBS, Job } from '@/lib/mock-data'
+import { useWalletStore } from '@/store/wallet'
 import { Search } from 'lucide-react'
 
 const CATEGORIES = ['All', 'Development', 'Design', 'Security', 'Writing', 'Marketing', 'Mobile']
 
 export default function ExplorePage() {
+  const { address } = useWalletStore()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string | null>('All')
   const [sort, setSort] = useState<string | null>('newest')
   const [loading] = useState(false)
+  const [chainJobs, setChainJobs] = useState<Job[]>([])
+
+  async function loadFromChain() {
+    if (!address) return
+    try {
+      const { getJob } = await import('@/lib/contracts')
+      const raw = await getJob(address, 1) as {
+        title: string; description: string; budget: string;
+        deadline: string; client: string; state: number
+      }
+      if (!raw) return
+      const chainJob: Job = {
+        id: 'chain-1',
+        title: raw.title,
+        description: raw.description,
+        budget: Number(raw.budget) / 10_000_000,
+        deadline: new Date(Number(raw.deadline) * 1000).toISOString().split('T')[0],
+        clientAddress: raw.client,
+        category: 'Development',
+        tags: ['On-Chain'],
+        status: 'open',
+        milestones: [],
+      }
+      setChainJobs([chainJob])
+    } catch {} // ponytail: swallow silently; chain may not have job #1
+  }
 
   const filtered = MOCK_JOBS
     .filter((j) => {
@@ -62,6 +91,11 @@ export default function ExplorePage() {
             <SelectItem value="budget_low" className="text-slate-200 focus:bg-slate-700">Budget: Low to High</SelectItem>
           </SelectContent>
         </Select>
+        {address && (
+          <Button onClick={loadFromChain} variant="outline" className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 whitespace-nowrap">
+            Load on-chain jobs
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -74,7 +108,7 @@ export default function ExplorePage() {
         <div className="text-center py-20 text-slate-500">No jobs match your search.</div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((job) => <JobCard key={job.id} job={job} />)}
+          {[...chainJobs, ...filtered].map((job) => <JobCard key={job.id} job={job} />)}
         </div>
       )}
     </div>

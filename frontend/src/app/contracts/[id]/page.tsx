@@ -4,6 +4,7 @@ import { use } from 'react'
 import { notFound } from 'next/navigation'
 import { MOCK_CONTRACTS } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
+import { useWalletStore } from '@/store/wallet'
 import { MilestoneTracker } from '@/components/milestone-tracker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,12 +15,52 @@ import { ArrowRight, Lock } from 'lucide-react'
 
 export default function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
+  const { address } = useWalletStore()
   const contract = MOCK_CONTRACTS.find((c) => c.id === id)
 
   if (!contract) notFound()
 
   const approved = contract.milestones.filter(m => m.status === 'approved').length
   const progress = Math.round((approved / contract.milestones.length) * 100)
+
+  // ponytail: milestoneId from mock data for now; swap for real id when contract data is loaded from chain
+  const activeMilestoneId = contract.milestones.findIndex(m => m.status === 'active')
+
+  async function handleSubmitWork() {
+    if (!address) return
+    const proofUrl = prompt('Enter proof URL (GitHub link, Figma, etc):')
+    if (!proofUrl) return
+    try {
+      const { submitMilestone } = await import('@/lib/contracts')
+      await submitMilestone(address, activeMilestoneId, proofUrl)
+      alert('Work submitted!')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Transaction failed')
+    }
+  }
+
+  async function handleApprove() {
+    if (!address) return
+    try {
+      const { approveMilestone, releaseEscrow } = await import('@/lib/contracts')
+      await approveMilestone(address, activeMilestoneId)
+      await releaseEscrow(address, activeMilestoneId)
+      alert('Milestone approved and escrow released!')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Transaction failed')
+    }
+  }
+
+  async function handleDispute() {
+    if (!address) return
+    try {
+      const { disputeMilestone } = await import('@/lib/contracts')
+      await disputeMilestone(address, activeMilestoneId)
+      alert('Dispute raised!')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Transaction failed')
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -86,13 +127,13 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               <CardTitle className="text-slate-200 text-base">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button size="sm" className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold">
+              <Button size="sm" onClick={handleSubmitWork} className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold">
                 Submit Work
               </Button>
-              <Button size="sm" variant="outline" className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
+              <Button size="sm" variant="outline" onClick={handleApprove} className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
                 Approve Milestone
               </Button>
-              <Button size="sm" variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10">
+              <Button size="sm" variant="outline" onClick={handleDispute} className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10">
                 Raise Dispute
               </Button>
             </CardContent>

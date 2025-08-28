@@ -1,0 +1,1 @@
+/home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/target/wasm32v1-none/release/workchain_escrow.wasm: /home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/contracts/escrow/src/lib.rs

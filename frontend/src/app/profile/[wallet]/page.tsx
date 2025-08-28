@@ -1,5 +1,9 @@
+'use client'
+
+import { use, useEffect, useState } from 'react'
 import { MOCK_PROFILES } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
+import { useWalletStore } from '@/store/wallet'
 import { ReputationBadge } from '@/components/reputation-badge'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,8 +11,9 @@ import { Separator } from '@/components/ui/separator'
 import Image from 'next/image'
 import { CheckCircle } from 'lucide-react'
 
-export default async function ProfilePage({ params }: { params: Promise<{ wallet: string }> }) {
-  const { wallet } = await params
+export default function ProfilePage({ params }: { params: Promise<{ wallet: string }> }) {
+  const { wallet } = use(params)
+  const { address } = useWalletStore()
   const profile = MOCK_PROFILES[wallet] ?? {
     walletAddress: wallet,
     reputation: 0,
@@ -16,6 +21,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ wallet
     skills: [],
     jobHistory: [],
   }
+  const [rep, setRep] = useState({ score: profile.reputation, count: profile.totalJobs })
+
+  useEffect(() => {
+    if (!wallet || !address) return
+    import('@/lib/contracts').then(({ getReputation }) => {
+      getReputation(address, wallet).then(setRep).catch(() => {})
+    })
+  }, [wallet, address])
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -33,7 +46,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ wallet
               />
             </div>
             <p className="font-mono text-slate-400 text-sm mb-3">{shortenAddress(wallet)}</p>
-            <ReputationBadge score={profile.reputation} count={profile.totalJobs} />
+            <ReputationBadge score={rep.score} count={rep.count} />
             <Separator className="bg-slate-700 my-4" />
             <div className="flex flex-wrap gap-1.5 justify-center">
               {profile.skills.map((skill) => (

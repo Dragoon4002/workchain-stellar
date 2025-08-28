@@ -1,0 +1,14 @@
+/home/sounak/programming/Web3/Web3 Hackathons/stellar/workchain/target/release/deps/serde-4d003ee315e017b9.d: /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/target/release/build/serde-c4551bd3e05c6653/out/private.rs
+
+/home/sounak/programming/Web3/Web3 Hackathons/stellar/workchain/target/release/deps/libserde-4d003ee315e017b9.rlib: /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/target/release/build/serde-c4551bd3e05c6653/out/private.rs
+
+/home/sounak/programming/Web3/Web3 Hackathons/stellar/workchain/target/release/deps/libserde-4d003ee315e017b9.rmeta: /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/target/release/build/serde-c4551bd3e05c6653/out/private.rs
+
+/home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/home/sounak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/home/sounak/programming/Web3/Web3\ Hackathons/stellar/workchain/target/release/build/serde-c4551bd3e05c6653/out/private.rs:
+
+# env-dep:OUT_DIR=/home/sounak/programming/Web3/Web3 Hackathons/stellar/workchain/target/release/build/serde-c4551bd3e05c6653/out

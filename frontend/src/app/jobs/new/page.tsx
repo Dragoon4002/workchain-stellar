@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWalletStore } from '@/store/wallet'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +30,27 @@ export default function NewJobPage() {
   const [budget, setBudget] = useState('')
   const [deadline, setDeadline] = useState('')
   const [milestones, setMilestones] = useState<MilestoneRow[]>([{ description: '', amount: '' }])
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handlePost() {
+    if (!address) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const { postJob, createMilestone } = await import('@/lib/contracts')
+      const deadlineUnix = Math.floor(new Date(deadline).getTime() / 1000)
+      const jobId = await postJob(address, title, description, parseFloat(budget), deadlineUnix)
+      for (const m of milestones) {
+        await createMilestone(address, jobId, m.description, parseFloat(m.amount), deadlineUnix)
+      }
+      router.push('/dashboard')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Transaction failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (!address) {
     return (
@@ -165,11 +187,17 @@ export default function NewJobPage() {
                 Next <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
-              <Button onClick={() => router.push('/dashboard')} className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold">
-                Post Job
+              <Button onClick={handlePost} disabled={submitting} className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold disabled:opacity-60">
+                {submitting ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Posting...</> : 'Post Job'}
               </Button>
             )}
           </div>
+          {step === 3 && submitting && (
+            <p className="text-xs text-amber-400 text-center">Waiting for wallet signature...</p>
+          )}
+          {step === 3 && error && (
+            <div className="rounded-md bg-red-500/10 border border-red-500/30 px-3 py-2 text-sm text-red-400">{error}</div>
+          )}
         </CardContent>
       </Card>
     </div>

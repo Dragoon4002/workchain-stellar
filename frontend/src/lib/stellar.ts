@@ -1,7 +1,11 @@
-import { Horizon } from '@stellar/stellar-sdk'
+import { Horizon, rpc } from '@stellar/stellar-sdk'
 
 export const server = new Horizon.Server(
   process.env.NEXT_PUBLIC_HORIZON_URL ?? 'https://horizon-testnet.stellar.org'
+)
+
+export const rpcServer = new rpc.Server(
+  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ?? 'https://soroban-testnet.stellar.org'
 )
 
 export const CONTRACT_ADDRESSES = {
