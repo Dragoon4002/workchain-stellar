@@ -39,7 +39,7 @@ export default function MyProfilePage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <AlertCircle className="w-12 h-12 text-[#dddddd]" />
         <h1 className="text-xl font-bold text-white">Connect your wallet</h1>
-        <p className="text-slate-400 text-sm">Your profile is linked to your wallet address.</p>
+        <p className="text-white/40 text-sm">Your profile is linked to your wallet address.</p>
         <WalletConnect />
       </div>
     )
@@ -50,7 +50,10 @@ export default function MyProfilePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-      <h1 className="text-2xl font-bold text-white">My Profile</h1>
+      <div>
+        <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-1">Identity</p>
+        <h1 className="font-serif italic text-3xl text-white">My Profile</h1>
+      </div>
 
       {/* Stat row */}
       <div className="grid sm:grid-cols-3 gap-4">
@@ -96,16 +99,16 @@ export default function MyProfilePage() {
             <p className="text-white font-semibold text-sm mb-1">
               {address === 'GYOUR_ADDRESS_HERE' ? 'Demo Account' : 'Freelancer'}
             </p>
-            <p className="font-mono text-slate-400 text-xs mb-3 break-all px-2">{shortenAddress(address)}</p>
+            <p className="font-mono text-white/40 text-xs mb-3 break-all px-2">{shortenAddress(address)}</p>
             <ReputationBadge score={rep.score} count={rep.count} />
             <Separator className="bg-white/8 my-4" />
             <div className="flex flex-wrap gap-1.5 justify-center">
               {(profile?.skills ?? []).length > 0 ? profile!.skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="bg-white/8 text-slate-300 text-xs border border-white/8">
+                <Badge key={skill} variant="secondary" className="bg-white/8 text-white/60 text-xs border border-white/8">
                   {skill}
                 </Badge>
               )) : (
-                <p className="text-slate-600 text-xs">No skills listed</p>
+                <p className="text-white/20 text-xs">No skills listed</p>
               )}
             </div>
           </CardContent>
@@ -115,14 +118,14 @@ export default function MyProfilePage() {
         <div className="md:col-span-2 space-y-4">
           <Card className="glass">
             <CardHeader className="pb-3">
-              <CardTitle className="text-slate-200 text-base flex items-center gap-2">
+              <CardTitle className="text-white text-base flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-500" />
                 Job History
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {(profile?.jobHistory ?? []).length === 0 ? (
-                <p className="text-slate-500 text-sm py-4 text-center">No completed jobs yet.</p>
+                <p className="text-white/30 text-sm py-4 text-center">No completed jobs yet.</p>
               ) : (
                 profile!.jobHistory.map((j) => (
                   <div key={j.id} className="flex items-center justify-between p-3 rounded-lg bg-white/3 border border-white/6 hover:bg-white/5 transition-colors">
@@ -131,8 +134,8 @@ export default function MyProfilePage() {
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
                       <div>
-                        <p className="text-slate-200 text-sm font-medium">{j.title}</p>
-                        <p className="text-slate-500 text-xs capitalize">{j.status}</p>
+                        <p className="text-white text-sm font-medium">{j.title}</p>
+                        <p className="text-white/30 text-xs capitalize">{j.status}</p>
                       </div>
                     </div>
                     <span className="font-mono text-[#dddddd] text-sm font-semibold shrink-0">
@@ -148,7 +151,7 @@ export default function MyProfilePage() {
           {freelancer && freelancer.portfolio.length > 0 && (
             <Card className="glass">
               <CardHeader className="pb-3">
-                <CardTitle className="text-slate-200 text-base flex items-center gap-2">
+                <CardTitle className="text-white text-base flex items-center gap-2">
                   <Layers className="w-4 h-4 text-blue-400" />
                   Portfolio
                 </CardTitle>
@@ -157,10 +160,10 @@ export default function MyProfilePage() {
                 {freelancer.portfolio.map((item, i) => (
                   <div key={i} className="p-3 rounded-lg bg-white/3 border border-white/6 hover:bg-white/5 transition-colors">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-slate-200 text-sm font-medium">{item.title}</p>
-                      <Badge className="bg-white/8 text-slate-300 text-xs border border-white/8 shrink-0">{item.tag}</Badge>
+                      <p className="text-white text-sm font-medium">{item.title}</p>
+                      <Badge className="bg-white/8 text-white/60 text-xs border border-white/8 shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-slate-400 text-xs mt-1">{item.description}</p>
+                    <p className="text-white/40 text-xs mt-1">{item.description}</p>
                   </div>
                 ))}
               </CardContent>

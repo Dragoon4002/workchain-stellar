@@ -69,20 +69,21 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">{contract.jobTitle}</h1>
+        <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Contract</p>
+        <h1 className="font-serif italic text-3xl text-white mb-3">{contract.jobTitle}</h1>
         <div className="flex items-center gap-2 flex-wrap">
           <Badge className="bg-white/8 text-[#dddddd] border-white/15">
             <Lock className="w-3 h-3 mr-1" />
             {contract.lockedAmount.toLocaleString()} XLM locked
           </Badge>
-          <Badge variant="outline" className="border-slate-600 text-slate-400 capitalize">
+          <Badge variant="outline" className="border-slate-600 text-white/40 capitalize">
             {contract.status}
           </Badge>
         </div>
       </div>
 
       <div className="mb-6">
-        <div className="flex justify-between text-sm text-slate-400 mb-2">
+        <div className="flex justify-between text-sm text-white/40 mb-2">
           <span>Overall progress</span>
           <span>{approved} of {contract.milestones.length} milestones approved</span>
         </div>
@@ -93,7 +94,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         <div className="md:col-span-2">
           <Card className="glass">
             <CardHeader>
-              <CardTitle className="text-slate-200 text-base">Milestones</CardTitle>
+              <CardTitle className="text-white text-base">Milestones</CardTitle>
             </CardHeader>
             <CardContent>
               <MilestoneTracker milestones={contract.milestones} />
@@ -104,23 +105,23 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         <div className="space-y-4">
           <Card className="glass">
             <CardHeader className="pb-3">
-              <CardTitle className="text-slate-200 text-base">Parties</CardTitle>
+              <CardTitle className="text-white text-base">Parties</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="text-xs text-slate-400 mb-1">Client</p>
-                <p className="font-mono text-slate-300 text-sm">{shortenAddress(contract.clientAddress)}</p>
+                <p className="text-xs text-white/40 mb-1">Client</p>
+                <p className="font-mono text-white/60 text-sm">{shortenAddress(contract.clientAddress)}</p>
               </div>
               <div className="flex items-center justify-center">
-                <ArrowRight className="w-4 h-4 text-slate-600" />
+                <ArrowRight className="w-4 h-4 text-white/20" />
               </div>
               <div>
-                <p className="text-xs text-slate-400 mb-1">Freelancer</p>
-                <p className="font-mono text-slate-300 text-sm">{shortenAddress(contract.freelancerAddress)}</p>
+                <p className="text-xs text-white/40 mb-1">Freelancer</p>
+                <p className="font-mono text-white/60 text-sm">{shortenAddress(contract.freelancerAddress)}</p>
               </div>
               <Separator className="bg-white/8" />
               <div className="flex justify-between">
-                <span className="text-xs text-slate-400">Total Budget</span>
+                <span className="text-xs text-white/40">Total Budget</span>
                 <span className="font-mono text-[#dddddd] text-sm font-semibold">{contract.totalAmount.toLocaleString()} XLM</span>
               </div>
             </CardContent>
@@ -129,11 +130,11 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
           {(isFreelancer || isClient) && (
             <Card className="glass">
               <CardHeader className="pb-3">
-                <CardTitle className="text-slate-200 text-base">Actions</CardTitle>
+                <CardTitle className="text-white text-base">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {isFreelancer && (
-                  <Button size="sm" onClick={handleSubmitWork} className="w-full bg-[#dddddd] hover:bg-white text-black font-semibold">
+                  <Button size="sm" variant="tile" onClick={handleSubmitWork} className="w-full font-semibold">
                     Submit Work
                   </Button>
                 )}

@@ -58,38 +58,39 @@ export default function ExplorePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Browse Jobs</h1>
-        <p className="text-slate-400">{MOCK_JOBS.length} jobs available on-chain</p>
+        <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Marketplace</p>
+        <h1 className="font-serif italic text-4xl text-white mb-2">Browse Jobs</h1>
+        <p className="text-white/40 font-mono text-sm">{MOCK_JOBS.length} jobs available on-chain</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <Input
             placeholder="Search jobs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
+            className="pl-10 bg-white/5 border-white/8 text-white placeholder:text-white/30"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-slate-200">
+          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-white">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent className="bg-white/5 border-white/8">
             {CATEGORIES.map((c) => (
-              <SelectItem key={c} value={c} className="text-slate-200 focus:bg-white/8">{c}</SelectItem>
+              <SelectItem key={c} value={c} className="text-white focus:bg-white/8">{c}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-slate-200">
+          <SelectTrigger className="w-full sm:w-44 bg-white/5 border-white/8 text-white">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent className="bg-white/5 border-white/8">
-            <SelectItem value="newest" className="text-slate-200 focus:bg-white/8">Newest first</SelectItem>
-            <SelectItem value="budget_high" className="text-slate-200 focus:bg-white/8">Budget: High to Low</SelectItem>
-            <SelectItem value="budget_low" className="text-slate-200 focus:bg-white/8">Budget: Low to High</SelectItem>
+            <SelectItem value="newest" className="text-white focus:bg-white/8">Newest first</SelectItem>
+            <SelectItem value="budget_high" className="text-white focus:bg-white/8">Budget: High to Low</SelectItem>
+            <SelectItem value="budget_low" className="text-white focus:bg-white/8">Budget: Low to High</SelectItem>
           </SelectContent>
         </Select>
         {address && (
@@ -106,7 +107,7 @@ export default function ExplorePage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-slate-500">No jobs match your search.</div>
+        <div className="text-center py-20 text-white/30">No jobs match your search.</div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...chainJobs, ...filtered].map((job) => <JobCard key={job.id} job={job} />)}

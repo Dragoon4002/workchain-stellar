@@ -19,6 +19,7 @@ pub struct JobData {
 pub struct ProposalData {
     pub freelancer: Address,
     pub proposal: String,
+    pub price: i128,
 }
 
 #[contracttype]
@@ -72,8 +73,8 @@ impl JobContract {
         id
     }
 
-    /// Submit a proposal for a job.
-    pub fn apply(env: Env, freelancer: Address, job_id: u32, proposal: String) {
+    /// Submit a bid for a job with a custom price (freelancer sets any price).
+    pub fn bid(env: Env, freelancer: Address, job_id: u32, proposal: String, price: i128) {
         freelancer.require_auth();
 
         let job: JobData = env
@@ -82,18 +83,20 @@ impl JobContract {
             .get(&DataKey::Job(job_id))
             .expect("job not found");
         assert!(job.state == 0, "job not open");
+        assert!(price > 0, "price must be positive");
 
         let p = ProposalData {
             freelancer: freelancer.clone(),
             proposal,
+            price,
         };
         env.storage()
             .persistent()
             .set(&DataKey::Proposal(job_id, freelancer.clone()), &p);
 
         env.events().publish(
-            (Symbol::new(&env, "job"), Symbol::new(&env, "applied")),
-            (job_id, freelancer),
+            (Symbol::new(&env, "job"), Symbol::new(&env, "bid")),
+            (job_id, freelancer, price),
         );
     }
 

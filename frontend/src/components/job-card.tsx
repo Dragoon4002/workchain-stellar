@@ -13,13 +13,13 @@ const CATEGORY_PILL: Record<string, { bg: string; text: string }> = {
   Writing:     { bg: 'bg-emerald-500/15', text: 'text-emerald-400' },
   Marketing:   { bg: 'bg-pink-500/15', text: 'text-pink-400' },
   Mobile:      { bg: 'bg-cyan-500/15', text: 'text-cyan-400' },
-  Other:       { bg: 'bg-white/8', text: 'text-slate-400' },
+  Other:       { bg: 'bg-white/8', text: 'text-white/40' },
 }
 
 const STATUS_PILL: Record<string, { bg: string; text: string; dot: string }> = {
   open:        { bg: 'bg-emerald-500/15', text: 'text-emerald-400', dot: 'bg-emerald-400' },
   in_progress: { bg: 'bg-white/10', text: 'text-[#dddddd]', dot: 'bg-[#dddddd]' },
-  completed:   { bg: 'bg-white/8', text: 'text-slate-400', dot: 'bg-slate-400' },
+  completed:   { bg: 'bg-white/8', text: 'text-white/40', dot: 'bg-slate-400' },
 }
 
 // Inline SVG sparkline — no dep needed
@@ -66,17 +66,18 @@ export function JobCard({ job }: { job: Job }) {
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold text-slate-100 group-hover:text-white line-clamp-2 text-sm leading-snug mb-1.5">
+        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/20 mb-0.5">{job.category}</p>
+        <h3 className="font-serif italic text-white group-hover:text-white line-clamp-2 text-base leading-snug mb-1.5">
           {job.title}
         </h3>
 
         {/* Description */}
-        <p className="text-slate-500 text-xs line-clamp-2 mb-3 leading-relaxed">{job.description}</p>
+        <p className="text-white/30 text-xs line-clamp-2 mb-3 leading-relaxed font-mono">{job.description}</p>
 
         {/* Budget row with sparkline */}
         <div className="flex items-end justify-between mb-3 p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
           <div>
-            <p className="text-[10px] text-slate-600 mb-0.5 uppercase tracking-wide">Budget</p>
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/20 mb-0.5">Budget</p>
             <p className="font-mono text-[#dddddd] font-bold text-base leading-none">{job.budget.toLocaleString()} <span className="text-xs text-white/40 font-normal">XLM</span></p>
           </div>
           <Sparkline data={spark} />
@@ -85,17 +86,17 @@ export function JobCard({ job }: { job: Job }) {
         {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
           {job.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="px-1.5 py-0.5 rounded-md text-[10px] bg-white/5 text-slate-500 border border-white/8">
+            <span key={tag} className="px-1.5 py-0.5 rounded-md text-[10px] bg-white/5 text-white/30 border border-white/8">
               {tag}
             </span>
           ))}
           {job.tags.length > 3 && (
-            <span className="px-1.5 py-0.5 rounded-md text-[10px] bg-white/5 text-slate-600">+{job.tags.length - 3}</span>
+            <span className="px-1.5 py-0.5 rounded-md text-[10px] bg-white/5 text-white/20">+{job.tags.length - 3}</span>
           )}
         </div>
 
         {/* Meta row */}
-        <div className="flex items-center gap-3 text-[10px] text-slate-600">
+        <div className="flex items-center gap-3 text-[10px] text-white/20">
           <span className="flex items-center gap-1">
             <User className="w-3 h-3" />
             <span className="font-mono">{shortenAddress(job.clientAddress)}</span>
@@ -114,7 +115,7 @@ export function JobCard({ job }: { job: Job }) {
       <CardFooter className="pt-0 pb-4 px-4">
         <Link
           href={`/app/jobs/${job.id}`}
-          className={buttonVariants({ size: 'sm', className: 'w-full bg-[#dddddd] hover:bg-white text-black font-semibold transition-colors rounded-xl' })}
+          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-white/8 px-3 text-sm font-medium text-white/60 transition-all hover:bg-white/14 hover:text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(255,255,255,0.07),0_1px_2px_-1px_rgba(0,0,0,0.12),0_2px_4px_0px_rgba(0,0,0,0.08)]"
         >
           View Job
         </Link>
@@ -137,10 +138,10 @@ export function JobCardCompact({ job }: { job: Job }) {
             {job.status.replace('_', ' ')}
           </span>
         </div>
-        <p className="text-sm font-medium text-slate-200 truncate">{job.title}</p>
+        <p className="text-sm font-medium text-white truncate">{job.title}</p>
       </div>
       <p className="font-mono text-[#dddddd] text-sm font-semibold shrink-0">{job.budget.toLocaleString()} XLM</p>
-      <Link href={`/app/jobs/${job.id}`} className={buttonVariants({ variant: 'outline', size: 'sm', className: 'border-slate-600 text-slate-300 hover:bg-slate-700 shrink-0 text-xs' })}>
+      <Link href={`/app/jobs/${job.id}`} className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-lg bg-white/8 px-2.5 text-xs font-medium text-white/60 transition-all hover:bg-white/14 hover:text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.10),0_0_0_1px_rgba(255,255,255,0.06),0_1px_2px_-1px_rgba(0,0,0,0.10),0_2px_4px_0px_rgba(0,0,0,0.06)]">
         View
       </Link>
     </div>

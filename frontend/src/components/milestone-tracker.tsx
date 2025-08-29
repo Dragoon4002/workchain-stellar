@@ -10,7 +10,7 @@ const STATUS_CONFIG = {
   submitted: { icon: Clock, color: 'text-[#dddddd]', bg: 'bg-white/20', label: 'Submitted' },
   active: { icon: Circle, color: 'text-[#dddddd]', bg: 'bg-white/10 border-2 border-[#dddddd]/50', label: 'Active' },
   disputed: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500', label: 'Disputed' },
-  pending: { icon: Circle, color: 'text-slate-500', bg: 'bg-white/8', label: 'Pending' },
+  pending: { icon: Circle, color: 'text-white/30', bg: 'bg-white/8', label: 'Pending' },
 }
 
 export function MilestoneTracker({ milestones }: MilestoneTrackerProps) {
@@ -33,7 +33,7 @@ export function MilestoneTracker({ milestones }: MilestoneTrackerProps) {
               <div className="flex items-center gap-2 mb-0.5">
                 <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
               </div>
-              <p className="text-slate-200 font-medium text-sm">{milestone.description}</p>
+              <p className="text-white font-medium text-sm">{milestone.description}</p>
               <p className="text-[#dddddd] font-mono text-sm mt-0.5">{milestone.amount.toLocaleString()} XLM</p>
             </div>
           </div>

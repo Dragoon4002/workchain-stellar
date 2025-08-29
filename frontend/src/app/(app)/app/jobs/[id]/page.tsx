@@ -7,7 +7,8 @@ import { MOCK_JOBS, MOCK_BIDS, MOCK_CONTRACTS, type Bid } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { SlidingTabs } from '@/components/ui/sliding-tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -34,8 +35,9 @@ function BidCard({ bid, startingPrice, onSelect }: {
       <CardContent className="pt-4 pb-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-slate-200 font-semibold text-sm">{bid.freelancerName}</p>
-            <p className="font-mono text-slate-500 text-xs">{shortenAddress(bid.freelancerAddress)}</p>
+            <p className="text-xs font-mono uppercase tracking-[0.2em] text-white/20 mb-0.5">Freelancer</p>
+            <p className="font-serif italic text-base text-white">{bid.freelancerName}</p>
+            <p className="font-mono text-white/30 text-xs">{shortenAddress(bid.freelancerAddress)}</p>
           </div>
           <div className="text-right shrink-0">
             <p className={`text-xl font-bold font-mono ${cheap ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -52,22 +54,22 @@ function BidCard({ bid, startingPrice, onSelect }: {
           <span className="flex items-center gap-1 text-amber-400 text-sm font-semibold">
             <Star className="w-3.5 h-3.5 fill-amber-400" />{bid.reputation.toFixed(1)}
           </span>
-          <span className="text-slate-500 text-xs">{bid.completedJobs} jobs</span>
+          <span className="text-white/30 text-xs">{bid.completedJobs} jobs</span>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
           {bid.skills.slice(0, 3).map((s) => (
-            <Badge key={s} variant="secondary" className="bg-white/8 text-slate-300 text-xs">{s}</Badge>
+            <Badge key={s} variant="secondary" className="bg-white/8 text-white/60 text-xs">{s}</Badge>
           ))}
         </div>
 
         <div>
-          <p className={`text-slate-400 text-sm leading-relaxed ${expanded ? '' : 'line-clamp-2'}`}>
+          <p className={`text-white/40 text-sm leading-relaxed ${expanded ? '' : 'line-clamp-2'}`}>
             {bid.proposal}
           </p>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs text-slate-500 hover:text-slate-300 flex items-center gap-0.5 mt-1 transition-colors"
+            className="text-xs text-white/30 hover:text-white/60 flex items-center gap-0.5 mt-1 transition-colors"
           >
             {expanded ? <><ChevronUp className="w-3 h-3" /> Less</> : <><ChevronDown className="w-3 h-3" /> More</>}
           </button>
@@ -75,7 +77,7 @@ function BidCard({ bid, startingPrice, onSelect }: {
 
         <Button
           onClick={() => onSelect(bid)}
-          className="w-full bg-[#dddddd] hover:bg-white text-black font-semibold text-sm h-9 mt-1"
+          variant="tile" className="w-full font-semibold text-sm h-9 mt-1"
         >
           Select this freelancer
         </Button>
@@ -102,24 +104,24 @@ function CTASidebar({ job, relationship, myBid }: {
   return (
     <Card className="glass sticky top-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base text-slate-200">Job Details</CardTitle>
+        <CardTitle className="text-base text-white">Job Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400 flex items-center gap-1.5"><DollarSign className="w-4 h-4" /> Budget</span>
+          <span className="text-sm text-white/40 flex items-center gap-1.5"><DollarSign className="w-4 h-4" /> Budget</span>
           <span className="font-mono text-[#dddddd] font-semibold">{job.budget.toLocaleString()} XLM</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400 flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline</span>
-          <span className="text-slate-200 text-sm">{new Date(job.deadline).toLocaleDateString()}</span>
+          <span className="text-sm text-white/40 flex items-center gap-1.5"><Calendar className="w-4 h-4" /> Deadline</span>
+          <span className="text-white text-sm">{new Date(job.deadline).toLocaleDateString()}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400 flex items-center gap-1.5"><User className="w-4 h-4" /> Client</span>
-          <span className="font-mono text-slate-300 text-sm">{shortenAddress(job.clientAddress)}</span>
+          <span className="text-sm text-white/40 flex items-center gap-1.5"><User className="w-4 h-4" /> Client</span>
+          <span className="font-mono text-white/60 text-sm">{shortenAddress(job.clientAddress)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400 flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Milestones</span>
-          <span className="text-slate-200 text-sm">{job.milestones.length}</span>
+          <span className="text-sm text-white/40 flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Milestones</span>
+          <span className="text-white text-sm">{job.milestones.length}</span>
         </div>
 
         <Separator className="bg-slate-700" />
@@ -129,11 +131,11 @@ function CTASidebar({ job, relationship, myBid }: {
           <div className="space-y-2">
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5">
               <Briefcase className="w-4 h-4 text-[#dddddd] shrink-0" />
-              <span className="text-sm text-slate-300 font-medium">Your job</span>
+              <span className="text-sm text-white/60 font-medium">Your job</span>
             </div>
             <Link
               href={`/app/jobs/${job.id}#bids`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-[#dddddd] hover:bg-white text-black font-semibold text-sm transition-colors"
+              className={buttonVariants({ variant: 'tile', className: 'flex items-center justify-center gap-2 w-full font-semibold text-sm' })}
             >
               View Bids
             </Link>
@@ -149,13 +151,13 @@ function CTASidebar({ job, relationship, myBid }: {
             </div>
             <Link
               href="/app/messages"
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-[#dddddd] hover:bg-white text-black font-semibold text-sm transition-colors"
+              className={buttonVariants({ variant: 'tile', className: 'flex items-center justify-center gap-2 w-full font-semibold text-sm' })}
             >
               <MessageSquare className="w-4 h-4" /> Message Client
             </Link>
             <button
               onClick={() => setReportOpen(true)}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-slate-400 hover:text-red-400 font-medium text-sm transition-colors"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-white/40 hover:text-red-400 font-medium text-sm transition-colors"
             >
               <Flag className="w-4 h-4" /> Report / Dispute
             </button>
@@ -172,10 +174,10 @@ function CTASidebar({ job, relationship, myBid }: {
                 <p className="text-xs text-amber-500/80 font-mono">{myBid.price.toLocaleString()} XLM</p>
               </div>
             </div>
-            <p className="text-xs text-slate-500 text-center">Waiting for client to review</p>
+            <p className="text-xs text-white/30 text-center">Waiting for client to review</p>
             <button
               onClick={() => alert('Bid cancelled.')}
-              className="w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-slate-500 hover:text-red-400 font-medium text-sm transition-colors"
+              className="w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-white/30 hover:text-red-400 font-medium text-sm transition-colors"
             >
               Cancel Bid
             </button>
@@ -186,50 +188,50 @@ function CTASidebar({ job, relationship, myBid }: {
         {relationship === 'stranger' && (
           <Sheet>
             <SheetTrigger className="w-full">
-              <Button className="w-full bg-[#dddddd] hover:bg-white text-black font-semibold">
+              <Button variant="tile" className="w-full font-semibold">
                 Place Your Bid
               </Button>
             </SheetTrigger>
-            <SheetContent className="glass text-slate-100">
+            <SheetContent className="glass text-white">
               <SheetHeader>
-                <SheetTitle className="text-slate-100">Place Your Bid</SheetTitle>
-                <SheetDescription className="text-slate-400">
+                <SheetTitle className="text-white">Place Your Bid</SheetTitle>
+                <SheetDescription className="text-white/40">
                   Set your own price. Client will review all bids.
                 </SheetDescription>
               </SheetHeader>
               <div className="space-y-5 mt-6">
                 <div>
-                  <Label className="text-slate-300 mb-2 block">Your proposal</Label>
+                  <Label className="text-white/60 mb-2 block">Your proposal</Label>
                   <Textarea
                     placeholder="Describe your approach, experience, and why you're a great fit..."
                     value={proposal}
                     onChange={(e) => setProposal(e.target.value)}
                     rows={5}
-                    className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
+                    className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-300 mb-2 block">Your price (XLM)</Label>
+                  <Label className="text-white/60 mb-2 block">Your price (XLM)</Label>
                   <Input
                     type="number"
                     placeholder={`e.g. ${job.startingPrice}`}
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 font-mono"
+                    className="bg-white/5 border-white/8 text-white placeholder:text-white/30 font-mono"
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-300 mb-2 block">Timeline</Label>
+                  <Label className="text-white/60 mb-2 block">Timeline</Label>
                   <Input
                     placeholder="e.g. 3 weeks"
                     value={timeline}
                     onChange={(e) => setTimeline(e.target.value)}
-                    className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
+                    className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
                   />
                 </div>
                 <Button
                   onClick={() => console.log({ proposal, price, timeline, jobId: job.id })}
-                  className="w-full bg-[#dddddd] hover:bg-white text-black font-semibold"
+                  variant="tile" className="w-full font-semibold"
                 >
                   Submit Bid
                 </Button>
@@ -241,10 +243,10 @@ function CTASidebar({ job, relationship, myBid }: {
 
       {/* Report dialog — shown for assigned freelancers */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-        <DialogContent className="glass border-white/10 text-slate-100">
+        <DialogContent className="glass border-white/10 text-white">
           <DialogHeader>
             <DialogTitle className="text-red-400">Report / Raise Dispute</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               Describe the issue. This will escalate to platform review and lock the escrow until resolved.
             </DialogDescription>
           </DialogHeader>
@@ -253,10 +255,10 @@ function CTASidebar({ job, relationship, myBid }: {
             onChange={(e) => setReportText(e.target.value)}
             placeholder="Explain the issue in detail..."
             rows={4}
-            className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
+            className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
           />
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setReportOpen(false)} className="text-slate-400 hover:bg-white/8">
+            <Button variant="ghost" onClick={() => setReportOpen(false)} className="text-white/40 hover:bg-white/8">
               Cancel
             </Button>
             <Button
@@ -313,7 +315,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
           <div>
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge className="bg-white/8 text-[#dddddd] border-white/15">{job.category}</Badge>
-              <Badge variant="outline" className="border-slate-600 text-slate-400 capitalize">
+              <Badge variant="outline" className="border-slate-600 text-white/40 capitalize">
                 {job.status.replace('_', ' ')}
               </Badge>
               {relationship === 'owner' && (
@@ -326,13 +328,14 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/20">Bid submitted</Badge>
               )}
             </div>
-            <h1 className="text-2xl font-bold text-white mb-3">{job.title}</h1>
-            <p className="text-slate-400 leading-relaxed">{job.description}</p>
+            <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Job</p>
+            <h1 className="font-serif italic text-3xl text-white mb-3">{job.title}</h1>
+            <p className="text-white/40 leading-relaxed">{job.description}</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {job.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="bg-white/8 text-slate-300">{tag}</Badge>
+              <Badge key={tag} variant="secondary" className="bg-white/8 text-white/60">{tag}</Badge>
             ))}
           </div>
 
@@ -347,16 +350,17 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
           {/* Milestones */}
           <div>
-            <h2 className="text-lg font-semibold text-white mb-4">Milestones</h2>
+            <p className="text-xs font-mono uppercase tracking-[0.2em] text-white/20 mb-1">Deliverables</p>
+            <h2 className="font-serif italic text-2xl text-white mb-4">Milestones</h2>
             <div className="space-y-3">
               {job.milestones.map((m, i) => (
                 <Card key={m.id} className="glass">
                   <CardContent className="flex items-center justify-between py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center text-xs font-mono text-slate-400">
+                      <div className="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center text-xs font-mono text-white/40">
                         {i + 1}
                       </div>
-                      <span className="text-slate-200 text-sm">{m.description}</span>
+                      <span className="text-white text-sm">{m.description}</span>
                     </div>
                     <span className="font-mono text-[#dddddd] font-semibold text-sm">
                       {m.amount.toLocaleString()} XLM
@@ -371,29 +375,25 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
           {relationship === 'owner' && (
             <div id="bids">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <h2 className="text-lg font-semibold text-white">
-                  Bids Received <span className="text-slate-400 font-normal text-base">({bids.length})</span>
-                </h2>
-                <div className="flex items-center gap-1 text-sm text-slate-400">
-                  <span className="mr-1 text-xs">Sort:</span>
-                  {(['price', 'rating', 'newest'] as const).map((k) => (
-                    <button
-                      key={k}
-                      onClick={() => setSort(k)}
-                      className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
-                        sort === k
-                          ? 'bg-[#dddddd] text-black border-[#dddddd]'
-                          : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
-                      }`}
-                    >
-                      {k === 'price' ? 'Price ↑' : k === 'rating' ? 'Rating ↓' : 'Newest'}
-                    </button>
-                  ))}
+                <div>
+                  <p className="text-xs font-mono uppercase tracking-[0.2em] text-white/20 mb-0.5">Proposals</p>
+                  <h2 className="font-serif italic text-2xl text-white">
+                    Bids <span className="text-white/40 not-italic font-sans text-base">({bids.length})</span>
+                  </h2>
                 </div>
+                <SlidingTabs
+                  tabs={[
+                    { id: 'price', label: 'Price ↑' },
+                    { id: 'rating', label: 'Rating ↓' },
+                    { id: 'newest', label: 'Newest' },
+                  ]}
+                  defaultActiveId={sort}
+                  onChange={(id) => setSort(id as 'price' | 'rating' | 'newest')}
+                />
               </div>
 
               {sortedBids.length === 0 ? (
-                <p className="text-slate-500 text-sm py-8 text-center">No bids yet. Freelancers will start bidding soon.</p>
+                <p className="text-white/30 text-sm py-8 text-center">No bids yet. Freelancers will start bidding soon.</p>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-4">
                   {sortedBids.map((bid) => (
@@ -413,22 +413,22 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
       {/* Hire confirmation dialog */}
       <Dialog open={!!selectedBid} onOpenChange={(open) => !open && setSelectedBid(null)}>
-        <DialogContent className="glass border-white/10 text-slate-100">
+        <DialogContent className="glass border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Confirm Selection</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Hire <span className="text-slate-200 font-semibold">{selectedBid?.freelancerName}</span> for{' '}
+            <DialogTitle className="text-white">Confirm Selection</DialogTitle>
+            <DialogDescription className="text-white/40">
+              Hire <span className="text-white font-semibold">{selectedBid?.freelancerName}</span> for{' '}
               <span className="font-mono text-[#dddddd] font-semibold">{selectedBid?.price.toLocaleString()} XLM</span>?
               A message room will open and the contract will be initialised.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setSelectedBid(null)} className="text-slate-400 hover:bg-white/8">
+            <Button variant="ghost" onClick={() => setSelectedBid(null)} className="text-white/40 hover:bg-white/8">
               Cancel
             </Button>
             <Button
               onClick={() => { alert('Match created! Message room opened.'); setSelectedBid(null) }}
-              className="bg-[#dddddd] hover:bg-white text-black font-semibold"
+              variant="tile" className="font-semibold"
             >
               Confirm & Hire
             </Button>

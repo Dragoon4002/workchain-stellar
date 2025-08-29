@@ -90,19 +90,19 @@ export default function NewJobPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Title */}
           <div>
-            <Label className="text-slate-300 mb-2 block">Job Title <span className="text-red-400">*</span></Label>
+            <Label className="text-white/60 mb-2 block">Job Title <span className="text-red-400">*</span></Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Build a DeFi Dashboard"
-              className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500"
+              className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
             />
             {submitted && errors.title && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
           </div>
 
           {/* Category */}
           <div>
-            <Label className="text-slate-300 mb-2 block">Category <span className="text-red-400">*</span></Label>
+            <Label className="text-white/60 mb-2 block">Category <span className="text-red-400">*</span></Label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((c) => (
                 <button
@@ -112,7 +112,7 @@ export default function NewJobPage() {
                   className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
                     category === c
                       ? 'bg-[#dddddd] text-black border-[#dddddd]'
-                      : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                      : 'border-slate-700 text-white/40 hover:border-slate-500 hover:text-white'
                   }`}
                 >
                   {c}
@@ -124,13 +124,13 @@ export default function NewJobPage() {
 
           {/* Description */}
           <div>
-            <Label className="text-slate-300 mb-2 block">Description <span className="text-red-400">*</span></Label>
+            <Label className="text-white/60 mb-2 block">Description <span className="text-red-400">*</span></Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the project in detail — scope, requirements, deliverables..."
               rows={6}
-              className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 resize-none"
+              className="bg-white/5 border-white/8 text-white placeholder:text-white/30 resize-none"
             />
             {submitted && errors.description && <p className="text-xs text-red-400 mt-1">{errors.description}</p>}
           </div>
@@ -138,26 +138,26 @@ export default function NewJobPage() {
           {/* Price + Deadline */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-slate-300 mb-2 block">
+              <Label className="text-white/60 mb-2 block">
                 Starting price (XLM) <span className="text-red-400">*</span>
-                <span className="block text-xs text-slate-500 font-normal mt-0.5">Freelancers can bid any amount</span>
+                <span className="block text-xs text-white/30 font-normal mt-0.5">Freelancers can bid any amount</span>
               </Label>
               <Input
                 type="number"
                 value={startingPrice}
                 onChange={(e) => setStartingPrice(e.target.value)}
                 placeholder="e.g. 2000"
-                className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 font-mono"
+                className="bg-white/5 border-white/8 text-white placeholder:text-white/30 font-mono"
               />
               {submitted && errors.startingPrice && <p className="text-xs text-red-400 mt-1">{errors.startingPrice}</p>}
             </div>
             <div>
-              <Label className="text-slate-300 mb-2 block">Deadline <span className="text-red-400">*</span></Label>
+              <Label className="text-white/60 mb-2 block">Deadline <span className="text-red-400">*</span></Label>
               <Input
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="bg-white/5 border-white/8 text-slate-100"
+                className="bg-white/5 border-white/8 text-white"
               />
               {submitted && errors.deadline && <p className="text-xs text-red-400 mt-1">{errors.deadline}</p>}
             </div>
@@ -166,9 +166,9 @@ export default function NewJobPage() {
           {/* Milestones */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <Label className="text-slate-300">Milestones <span className="text-red-400">*</span></Label>
+              <Label className="text-white/60">Milestones <span className="text-red-400">*</span></Label>
               {milestoneTotal > 0 && (
-                <span className="text-xs font-mono text-slate-400">
+                <span className="text-xs font-mono text-white/40">
                   Total: <span className="text-[#dddddd] font-semibold">{milestoneTotal.toLocaleString()} XLM</span>
                 </span>
               )}
@@ -176,19 +176,19 @@ export default function NewJobPage() {
             <div className="space-y-2">
               {milestones.map((m, i) => (
                 <div key={i} className="flex gap-2 items-start">
-                  <span className="w-6 h-9 flex items-center justify-center text-xs font-mono text-slate-500 shrink-0">{i + 1}</span>
+                  <span className="w-6 h-9 flex items-center justify-center text-xs font-mono text-white/30 shrink-0">{i + 1}</span>
                   <Input
                     value={m.description}
                     onChange={(e) => updateMilestone(i, 'description', e.target.value)}
                     placeholder={`Milestone ${i + 1} description`}
-                    className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 text-sm flex-1"
+                    className="bg-white/5 border-white/8 text-white placeholder:text-white/30 text-sm flex-1"
                   />
                   <Input
                     type="number"
                     value={m.amount}
                     onChange={(e) => updateMilestone(i, 'amount', e.target.value)}
                     placeholder="XLM"
-                    className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 font-mono text-sm w-28 shrink-0"
+                    className="bg-white/5 border-white/8 text-white placeholder:text-white/30 font-mono text-sm w-28 shrink-0"
                   />
                   <Button
                     type="button"
@@ -209,7 +209,7 @@ export default function NewJobPage() {
               variant="outline"
               size="sm"
               onClick={addMilestone}
-              className="border-slate-700 text-slate-300 hover:bg-white/8 w-full mt-2"
+              className="border-slate-700 text-white/60 hover:bg-white/8 w-full mt-2"
             >
               <Plus className="w-4 h-4 mr-1" /> Add Milestone
             </Button>
@@ -217,23 +217,23 @@ export default function NewJobPage() {
 
           {/* Tags */}
           <div>
-            <Label className="text-slate-300 mb-2 block">Tags</Label>
+            <Label className="text-white/60 mb-2 block">Tags</Label>
             <div className="flex gap-2">
               <Input
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={onTagKey}
                 placeholder="Type tag + Enter"
-                className="bg-white/5 border-white/8 text-slate-100 placeholder:text-slate-500 flex-1"
+                className="bg-white/5 border-white/8 text-white placeholder:text-white/30 flex-1"
               />
-              <Button type="button" variant="outline" size="sm" onClick={addTag} className="border-slate-700 text-slate-300 hover:bg-white/8 shrink-0">
+              <Button type="button" variant="outline" size="sm" onClick={addTag} className="border-slate-700 text-white/60 hover:bg-white/8 shrink-0">
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {tags.map((t) => (
-                  <Badge key={t} variant="secondary" className="bg-white/8 text-slate-300 gap-1 pr-1">
+                  <Badge key={t} variant="secondary" className="bg-white/8 text-white/60 gap-1 pr-1">
                     {t}
                     <button onClick={() => removeTag(t)} className="hover:text-white transition-colors">
                       <X className="w-3 h-3" />
@@ -246,7 +246,7 @@ export default function NewJobPage() {
 
           <Button
             onClick={handleSubmit}
-            className="w-full bg-[#dddddd] hover:bg-white text-black font-semibold h-11 text-base"
+            variant="tile" className="w-full font-semibold h-11 text-base"
           >
             Post Job
           </Button>
@@ -256,7 +256,7 @@ export default function NewJobPage() {
         <div className="lg:sticky lg:top-6">
           <Card className="glass">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-slate-400 font-medium uppercase tracking-wider">Live Preview</CardTitle>
+              <CardTitle className="text-sm text-white/40 font-medium uppercase tracking-wider">Live Preview</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {title ? (
@@ -267,11 +267,11 @@ export default function NewJobPage() {
 
               <div className="flex flex-wrap gap-1.5">
                 {category && <Badge className="bg-white/8 text-[#dddddd] border-white/15 text-xs">{category}</Badge>}
-                <Badge variant="outline" className="border-slate-700 text-slate-500 text-xs">open</Badge>
+                <Badge variant="outline" className="border-slate-700 text-white/30 text-xs">open</Badge>
               </div>
 
               {description ? (
-                <p className="text-slate-400 text-xs leading-relaxed line-clamp-4">{description}</p>
+                <p className="text-white/40 text-xs leading-relaxed line-clamp-4">{description}</p>
               ) : (
                 <div className="space-y-1.5">
                   <div className="h-2.5 bg-white/5 rounded w-full" />
@@ -284,24 +284,24 @@ export default function NewJobPage() {
 
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Starting price</span>
+                  <span className="text-white/30 flex items-center gap-1"><DollarSign className="w-3 h-3" /> Starting price</span>
                   <span className="font-mono text-amber-400 font-semibold">
                     {startingPrice ? `${Number(startingPrice).toLocaleString()} XLM` : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1"><Calendar className="w-3 h-3" /> Deadline</span>
-                  <span className="text-slate-300">
+                  <span className="text-white/30 flex items-center gap-1"><Calendar className="w-3 h-3" /> Deadline</span>
+                  <span className="text-white/60">
                     {deadline ? new Date(deadline).toLocaleDateString() : '—'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Milestones</span>
-                  <span className="text-slate-300">{milestones.length}</span>
+                  <span className="text-white/30">Milestones</span>
+                  <span className="text-white/60">{milestones.length}</span>
                 </div>
                 {milestoneTotal > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Total value</span>
+                    <span className="text-white/30">Total value</span>
                     <span className="font-mono text-[#dddddd] font-semibold">{milestoneTotal.toLocaleString()} XLM</span>
                   </div>
                 )}
@@ -311,9 +311,9 @@ export default function NewJobPage() {
                 <>
                   <Separator className="bg-slate-800" />
                   <div className="flex flex-wrap gap-1">
-                    <Tag className="w-3 h-3 text-slate-500 mt-0.5 shrink-0" />
+                    <Tag className="w-3 h-3 text-white/30 mt-0.5 shrink-0" />
                     {tags.map((t) => (
-                      <Badge key={t} variant="secondary" className="bg-white/8 text-slate-400 text-xs">{t}</Badge>
+                      <Badge key={t} variant="secondary" className="bg-white/8 text-white/40 text-xs">{t}</Badge>
                     ))}
                   </div>
                 </>

@@ -34,8 +34,8 @@ export default function MessagesPage() {
       </div>
 
       {rooms.length === 0 ? (
-        <div className="glass rounded-xl p-10 text-center text-slate-400 flex flex-col items-center gap-3">
-          <MessageSquare className="w-8 h-8 text-slate-600" />
+        <div className="glass rounded-xl p-10 text-center text-white/40 flex flex-col items-center gap-3">
+          <MessageSquare className="w-8 h-8 text-white/20" />
           <p>No active conversations. Hire a freelancer or get hired to start chatting.</p>
         </div>
       ) : (
@@ -53,22 +53,22 @@ export default function MessagesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-[#dddddd] text-sm truncate">{room.jobTitle}</span>
-                      <span className="text-xs text-slate-500 ml-2 shrink-0">{last ? relativeTime(last.timestamp) : ''}</span>
+                      <span className="text-xs text-white/30 ml-2 shrink-0">{last ? relativeTime(last.timestamp) : ''}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="text-xs font-mono text-slate-400">{shortenAddress(otherAddress)}</span>
-                      <span className="text-xs text-slate-600">·</span>
-                      <span className="text-xs text-slate-500">{role}</span>
+                      <span className="text-xs font-mono text-white/40">{shortenAddress(otherAddress)}</span>
+                      <span className="text-xs text-white/20">·</span>
+                      <span className="text-xs text-white/30">{role}</span>
                     </div>
                     {last && (
-                      <p className="text-xs text-slate-500 truncate">{last.content}</p>
+                      <p className="text-xs text-white/30 truncate">{last.content}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {unread && (
                       <span className="w-2 h-2 rounded-full bg-amber-400" />
                     )}
-                    <ChevronRight className="w-4 h-4 text-slate-600" />
+                    <ChevronRight className="w-4 h-4 text-white/20" />
                   </div>
                 </div>
               </Link>

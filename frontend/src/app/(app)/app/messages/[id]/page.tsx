@@ -61,12 +61,12 @@ export default function ChatRoomPage({ params }: { params: Promise<{ id: string 
       <div className="flex flex-col flex-1 min-w-0">
         {/* Header */}
         <div className="glass border-b border-white/8 px-4 py-3 flex items-center gap-3 shrink-0">
-          <Link href="/app/messages" className="text-slate-400 hover:text-[#dddddd] transition-colors">
+          <Link href="/app/messages" className="text-white/40 hover:text-[#dddddd] transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-[#dddddd] text-sm truncate">{room.jobTitle}</p>
-            <p className="text-xs text-slate-500 font-mono">{shortenAddress(otherAddress)}</p>
+            <p className="text-xs text-white/30 font-mono">{shortenAddress(otherAddress)}</p>
           </div>
           <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 gap-1">
             <Lock className="w-3 h-3" />
@@ -80,11 +80,11 @@ export default function ChatRoomPage({ params }: { params: Promise<{ id: string 
             const mine = msg.senderId === me
             return (
               <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] rounded-xl px-3 py-2 ${mine ? 'bg-white/10 text-white' : 'bg-white/5 text-slate-200'}`}>
+                <div className={`max-w-[70%] rounded-xl px-3 py-2 ${mine ? 'bg-white/10 text-white' : 'bg-white/5 text-white'}`}>
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                   <div className="flex items-center gap-1 mt-1">
-                    <Lock className="w-2.5 h-2.5 text-slate-600" />
-                    <span className="text-xs text-slate-500">{formatTime(msg.timestamp)}</span>
+                    <Lock className="w-2.5 h-2.5 text-white/20" />
+                    <span className="text-xs text-white/30">{formatTime(msg.timestamp)}</span>
                   </div>
                 </div>
               </div>
@@ -101,12 +101,13 @@ export default function ChatRoomPage({ params }: { params: Promise<{ id: string 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Type a message…"
-            className="flex-1 resize-none bg-white/5 border border-white/8 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-white/20 max-h-32 overflow-y-auto"
+            className="flex-1 resize-none bg-white/5 border border-white/8 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 max-h-32 overflow-y-auto"
           />
           <Button
             onClick={send}
             size="icon"
-            className="bg-[#dddddd] hover:bg-white text-black shrink-0"
+            variant="tile"
+            className="shrink-0"
           >
             <SendHorizontal className="w-4 h-4" />
           </Button>
@@ -115,14 +116,14 @@ export default function ChatRoomPage({ params }: { params: Promise<{ id: string 
 
       {/* Sidebar — desktop only */}
       <div className="hidden lg:block w-72 shrink-0 glass border-l border-white/8 p-5 space-y-4 overflow-y-auto">
-        <div className="flex items-center gap-2 text-slate-300 font-semibold text-sm">
+        <div className="flex items-center gap-2 text-white/60 font-semibold text-sm">
           <Shield className="w-4 h-4 text-emerald-400" />
           Contract Info
         </div>
         <div className="space-y-3 text-sm">
           <div>
-            <p className="text-slate-500 text-xs mb-0.5">Contract ID</p>
-            <p className="font-mono text-slate-300 text-xs break-all">{room.contractId}</p>
+            <p className="text-white/30 text-xs mb-0.5">Contract ID</p>
+            <p className="font-mono text-white/60 text-xs break-all">{room.contractId}</p>
           </div>
           {(() => {
             const contract = MOCK_CONTRACTS.find((c) => c.id === room.contractId)
@@ -130,15 +131,15 @@ export default function ChatRoomPage({ params }: { params: Promise<{ id: string 
             return (
               <>
                 <div>
-                  <p className="text-slate-500 text-xs mb-0.5">Total Amount</p>
+                  <p className="text-white/30 text-xs mb-0.5">Total Amount</p>
                   <p className="font-mono text-[#dddddd] font-semibold">{contract.totalAmount.toLocaleString()} XLM</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs mb-0.5">Locked</p>
+                  <p className="text-white/30 text-xs mb-0.5">Locked</p>
                   <p className="font-mono text-[#dddddd]">{contract.lockedAmount.toLocaleString()} XLM</p>
                 </div>
                 <div>
-                  <p className="text-slate-500 text-xs mb-0.5">Status</p>
+                  <p className="text-white/30 text-xs mb-0.5">Status</p>
                   <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 capitalize">{contract.status}</Badge>
                 </div>
                 <Link

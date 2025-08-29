@@ -19,7 +19,8 @@ export function WalletConnect() {
       <Button
         onClick={connect}
         disabled={connecting}
-        className="bg-[#dddddd] hover:bg-white text-black font-semibold"
+        variant="tile"
+        className="font-semibold"
       >
         <Wallet className="w-4 h-4 mr-2" />
         {connecting ? 'Connecting...' : 'Connect Wallet'}
@@ -30,7 +31,7 @@ export function WalletConnect() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="outline" className="border-slate-600 text-slate-200 font-mono hover:bg-slate-800" />}
+        render={<Button variant="outline" className="border-slate-600 text-white font-mono hover:bg-slate-800" />}
       >
         <Wallet className="w-4 h-4 mr-2 text-[#dddddd]" />
         {shortenAddress(address)}
@@ -38,7 +39,7 @@ export function WalletConnect() {
       <DropdownMenuContent className="glass">
         <DropdownMenuItem
           onClick={() => navigator.clipboard.writeText(address)}
-          className="text-slate-200 hover:bg-white/8 cursor-pointer"
+          className="text-white hover:bg-white/8 cursor-pointer"
         >
           <Copy className="w-4 h-4 mr-2" />
           Copy Address

@@ -17,11 +17,11 @@ export function ReputationBadge({ score, count, size = 'md' }: ReputationBadgePr
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
-            className={`${iconSize} ${i < stars ? 'text-[#dddddd] fill-[#dddddd]' : 'text-slate-600'}`}
+            className={`${iconSize} ${i < stars ? 'text-[#dddddd] fill-[#dddddd]' : 'text-white/20'}`}
           />
         ))}
       </div>
-      <span className={`${textSize} text-slate-400`}>
+      <span className={`${textSize} text-white/40`}>
         {score.toFixed(1)} ({count})
       </span>
     </div>

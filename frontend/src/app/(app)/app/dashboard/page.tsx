@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { SlidingTabs } from '@/components/ui/sliding-tabs'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { buttonVariants } from '@/components/ui/button'
@@ -82,7 +83,7 @@ function MiniBar({ value, max, color = '#dddddd' }: { value: number; max: number
       <div className="flex-1 h-1 bg-white/8 rounded-full overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
       </div>
-      <span className="text-xs font-mono text-slate-400 w-8 text-right">{pct}%</span>
+      <span className="text-xs font-mono text-white/40 w-8 text-right">{pct}%</span>
     </div>
   )
 }
@@ -97,8 +98,8 @@ const MONTHS        = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oc
 const STATUS_COLOR: Record<string, string> = {
   approved: 'bg-emerald-500/10 text-emerald-400',
   submitted: 'bg-amber-500/10 text-amber-400',
-  active:   'bg-white/8 text-slate-300',
-  pending:  'bg-white/5 text-slate-500',
+  active:   'bg-white/8 text-white/60',
+  pending:  'bg-white/5 text-white/30',
   disputed: 'bg-red-500/10 text-red-400',
 }
 
@@ -150,8 +151,8 @@ function SharedHeader({ disputes }: { disputes: number }) {
             <Lock className="w-4 h-4 text-[#dddddd]" />
           </div>
           <div>
-            <p className="text-xs text-slate-500">Wallet Balance</p>
-            <p className="text-lg font-bold font-mono text-white">{balance.toLocaleString()} <span className="text-xs text-slate-400">XLM</span></p>
+            <p className="text-xs text-white/30">Wallet Balance</p>
+            <p className="text-lg font-bold font-mono text-white">{balance.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
           </div>
         </div>
         <div className="w-px h-10 bg-white/8" />
@@ -160,8 +161,8 @@ function SharedHeader({ disputes }: { disputes: number }) {
             <CheckCircle className="w-4 h-4 text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500">Claimable Now</p>
-            <p className="text-lg font-bold font-mono text-emerald-400">{claimableXLM.toLocaleString()} <span className="text-xs text-slate-400">XLM</span></p>
+            <p className="text-xs text-white/30">Claimable Now</p>
+            <p className="text-lg font-bold font-mono text-emerald-400">{claimableXLM.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
           </div>
         </div>
         <div className="w-px h-10 bg-white/8" />
@@ -170,7 +171,7 @@ function SharedHeader({ disputes }: { disputes: number }) {
             <Star className="w-4 h-4 text-purple-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500">Rep Score</p>
+            <p className="text-xs text-white/30">Rep Score</p>
             <p className="text-lg font-bold text-purple-400">4.7</p>
           </div>
         </div>
@@ -218,9 +219,9 @@ function FreelancerTab() {
     <div className="space-y-4">
       {/* 1. Action strip */}
       <div className="glass rounded-2xl p-5">
-        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Needs Attention</p>
+        <p className="text-xs text-white/30 font-semibold uppercase tracking-wider mb-3">Needs Attention</p>
         {!hasActions ? (
-          <p className="text-slate-400 text-sm flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> All clear</p>
+          <p className="text-white/40 text-sm flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> All clear</p>
         ) : (
           <div className="flex gap-2 overflow-x-auto pb-1">
             {mySubmittedMilestones.map(m => (
@@ -254,7 +255,7 @@ function FreelancerTab() {
             <Briefcase className="w-5 h-5 text-[#dddddd]" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Active Contracts</p>
+            <p className="text-xs text-white/30 mb-0.5">Active Contracts</p>
             <p className="text-xl font-bold text-white">{activeContracts.length}</p>
           </div>
           <div className="ml-auto flex items-center gap-1 text-emerald-400 text-xs font-semibold">
@@ -266,7 +267,7 @@ function FreelancerTab() {
             <Clock className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Next Deadline</p>
+            <p className="text-xs text-white/30 mb-0.5">Next Deadline</p>
             <p className="text-xl font-bold text-white">{nextDeadline}</p>
           </div>
         </div>
@@ -275,7 +276,7 @@ function FreelancerTab() {
             <Lock className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Total Locked (XLM)</p>
+            <p className="text-xs text-white/30 mb-0.5">Total Locked (XLM)</p>
             <p className="text-xl font-bold font-mono text-white">{totalLocked.toLocaleString()}</p>
           </div>
           <div className="ml-auto flex items-center gap-1 text-emerald-400 text-xs font-semibold">
@@ -288,12 +289,12 @@ function FreelancerTab() {
       <div className="glass rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/6">
           <span className="text-white font-semibold text-sm">Active Contracts</span>
-          <Link href="/app/contracts" className="text-xs text-slate-400 hover:text-[#dddddd] transition-colors flex items-center gap-1">
+          <Link href="/app/contracts" className="text-xs text-white/40 hover:text-[#dddddd] transition-colors flex items-center gap-1">
             View all <ArrowUpRight className="w-3 h-3" />
           </Link>
         </div>
         {activeContracts.length === 0 ? (
-          <p className="px-5 py-6 text-slate-500 text-sm">No active contracts.</p>
+          <p className="px-5 py-6 text-white/30 text-sm">No active contracts.</p>
         ) : (
           activeContracts.slice(0, 5).map((c, i) => {
             const progress = getProgress(c)
@@ -301,12 +302,12 @@ function FreelancerTab() {
             return (
               <div key={c.id} className={`flex items-center gap-4 px-5 py-3.5 border-b border-white/4 hover:bg-white/3 transition-colors ${i % 2 !== 0 ? 'bg-white/[0.01]' : ''}`}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-200 font-medium truncate">{c.jobTitle}</p>
+                  <p className="text-sm text-white font-medium truncate">{c.jobTitle}</p>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className="w-32 h-1 bg-white/8 rounded-full overflow-hidden">
                       <div className="h-full bg-[#dddddd] rounded-full" style={{ width: `${progress}%` }} />
                     </div>
-                    <span className="text-xs text-slate-500">{progress}%</span>
+                    <span className="text-xs text-white/30">{progress}%</span>
                   </div>
                 </div>
                 {active && (
@@ -316,7 +317,7 @@ function FreelancerTab() {
                 )}
                 <Link href={`/app/contracts/${c.id}`}
                   className="w-7 h-7 rounded-full bg-white/8 hover:bg-white/15 flex items-center justify-center transition-colors shrink-0">
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-white/40" />
                 </Link>
               </div>
             )
@@ -335,13 +336,13 @@ function FreelancerTab() {
           </div>
         </div>
         <div className="flex gap-3">
-          <div className="flex flex-col justify-between text-xs text-slate-600 py-1 shrink-0">
+          <div className="flex flex-col justify-between text-xs text-white/20 py-1 shrink-0">
             {['2.5k','2k','1.5k','1k','500','0'].map(l => <span key={l}>{l}</span>)}
           </div>
           <div className="flex-1 min-w-0">
             <AreaChart data={EARNINGS_DATA} color="#dddddd" height={140} showDot />
             <div className="flex justify-between mt-2">
-              {MONTHS.map(m => <span key={m} className="text-xs text-slate-600">{m}</span>)}
+              {MONTHS.map(m => <span key={m} className="text-xs text-white/20">{m}</span>)}
             </div>
           </div>
         </div>
@@ -375,9 +376,9 @@ function ClientTab() {
     <div className="space-y-4">
       {/* 1. Action strip */}
       <div className="glass rounded-2xl p-5">
-        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Needs Attention</p>
+        <p className="text-xs text-white/30 font-semibold uppercase tracking-wider mb-3">Needs Attention</p>
         {!hasActions ? (
-          <p className="text-slate-400 text-sm flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> All clear</p>
+          <p className="text-white/40 text-sm flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400" /> All clear</p>
         ) : (
           <div className="flex gap-2 overflow-x-auto pb-1">
             {myApprovableMillestones.map(m => (
@@ -405,7 +406,7 @@ function ClientTab() {
             <Briefcase className="w-5 h-5 text-[#dddddd]" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Posted Jobs</p>
+            <p className="text-xs text-white/30 mb-0.5">Posted Jobs</p>
             <p className="text-xl font-bold text-white">{MOCK_JOBS.length}</p>
           </div>
         </div>
@@ -414,7 +415,7 @@ function ClientTab() {
             <Users className="w-5 h-5 text-purple-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Applicants This Week</p>
+            <p className="text-xs text-white/30 mb-0.5">Applicants This Week</p>
             <p className="text-xl font-bold text-white">{applicantsThisWeek}</p>
           </div>
           <div className="ml-auto flex items-center gap-1 text-emerald-400 text-xs font-semibold">
@@ -426,7 +427,7 @@ function ClientTab() {
             <DollarSign className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Total Spent (XLM)</p>
+            <p className="text-xs text-white/30 mb-0.5">Total Spent (XLM)</p>
             <p className="text-xl font-bold font-mono text-white">{totalSpent.toLocaleString()}</p>
           </div>
         </div>
@@ -436,19 +437,19 @@ function ClientTab() {
       <div className="glass rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/6">
           <span className="text-white font-semibold text-sm">My Jobs</span>
-          <Link href="/app/jobs" className="text-xs text-slate-400 hover:text-[#dddddd] transition-colors flex items-center gap-1">
+          <Link href="/app/jobs" className="text-xs text-white/40 hover:text-[#dddddd] transition-colors flex items-center gap-1">
             View all <ArrowUpRight className="w-3 h-3" />
           </Link>
         </div>
         {MOCK_JOBS.slice(0, 5).map((j, i) => {
           const bidCount = MOCK_BIDS.filter(b => b.jobId === j.id).length
           const statusColor = j.status === 'open' ? 'bg-emerald-500/10 text-emerald-400' :
-            j.status === 'in_progress' ? 'bg-blue-500/10 text-blue-400' : 'bg-white/8 text-slate-400'
+            j.status === 'in_progress' ? 'bg-blue-500/10 text-blue-400' : 'bg-white/8 text-white/40'
           return (
             <div key={j.id} className={`flex items-center gap-4 px-5 py-3.5 border-b border-white/4 hover:bg-white/3 transition-colors ${i % 2 !== 0 ? 'bg-white/[0.01]' : ''}`}>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-200 font-medium truncate">{j.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5">Due {new Date(j.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                <p className="text-sm text-white font-medium truncate">{j.title}</p>
+                <p className="text-xs text-white/30 mt-0.5">Due {new Date(j.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
               </div>
               {bidCount > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 text-xs font-semibold shrink-0">
@@ -459,7 +460,7 @@ function ClientTab() {
                 {j.status.replace('_', ' ')}
               </span>
               <Link href={`/app/jobs/${j.id}`}
-                className="text-xs text-slate-400 hover:text-[#dddddd] transition-colors flex items-center gap-1 shrink-0">
+                className="text-xs text-white/40 hover:text-[#dddddd] transition-colors flex items-center gap-1 shrink-0">
                 View bids <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
@@ -471,16 +472,16 @@ function ClientTab() {
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <span className="text-white font-semibold text-sm">Spend Overview</span>
-          <span className="text-xs text-slate-500">Monthly XLM</span>
+          <span className="text-xs text-white/30">Monthly XLM</span>
         </div>
         <div className="flex gap-3">
-          <div className="flex flex-col justify-between text-xs text-slate-600 py-1 shrink-0">
+          <div className="flex flex-col justify-between text-xs text-white/20 py-1 shrink-0">
             {['2k','1.5k','1k','500','0'].map(l => <span key={l}>{l}</span>)}
           </div>
           <div className="flex-1 min-w-0">
             <AreaChart data={SPEND_DATA} color="#8B5CF6" height={140} showDot />
             <div className="flex justify-between mt-2">
-              {MONTHS.map(m => <span key={m} className="text-xs text-slate-600">{m}</span>)}
+              {MONTHS.map(m => <span key={m} className="text-xs text-white/20">{m}</span>)}
             </div>
           </div>
         </div>
@@ -500,28 +501,14 @@ export default function DashboardPage() {
       <SharedHeader disputes={disputedContracts.length} />
 
       {/* Tab pills */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setTab('freelancer')}
-          className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-            tab === 'freelancer'
-              ? 'bg-[#dddddd] text-black'
-              : 'bg-white/8 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Freelancer
-        </button>
-        <button
-          onClick={() => setTab('client')}
-          className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-            tab === 'client'
-              ? 'bg-[#dddddd] text-black'
-              : 'bg-white/8 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Client
-        </button>
-      </div>
+      <SlidingTabs
+        tabs={[
+          { id: 'freelancer', label: 'Freelancer' },
+          { id: 'client', label: 'Client' },
+        ]}
+        defaultActiveId={tab}
+        onChange={(id) => setTab(id as 'freelancer' | 'client')}
+      />
 
       {/* Tab content */}
       {tab === 'freelancer' ? <FreelancerTab /> : <ClientTab />}

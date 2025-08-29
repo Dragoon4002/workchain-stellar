@@ -15,10 +15,10 @@ export function Navbar() {
               <span className="text-xl font-bold text-[#dddddd]">WorkChain</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/app/explore" className="text-slate-400 hover:text-slate-200 transition-colors text-sm font-medium">
+              <Link href="/app/explore" className="text-white/40 hover:text-white transition-colors text-sm font-medium">
                 Explore
               </Link>
-              <Link href="/app/dashboard" className="text-slate-400 hover:text-slate-200 transition-colors text-sm font-medium">
+              <Link href="/app/dashboard" className="text-white/40 hover:text-white transition-colors text-sm font-medium">
                 Dashboard
               </Link>
             </div>
@@ -26,7 +26,7 @@ export function Navbar() {
           <div className="flex items-center gap-4">
             <Link
               href="/app/jobs/new"
-              className="hidden sm:block text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors"
+              className="hidden sm:block text-sm font-medium text-white/40 hover:text-white transition-colors"
             >
               Post a Job
             </Link>

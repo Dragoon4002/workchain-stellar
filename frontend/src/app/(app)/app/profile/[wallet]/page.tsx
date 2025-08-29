@@ -70,30 +70,30 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
               />
             </div>
             {freelancer && (
-              <p className="text-slate-200 font-semibold text-base mb-1">{freelancer.name}</p>
+              <p className="text-white font-semibold text-base mb-1">{freelancer.name}</p>
             )}
             {!freelancer && (
-              <p className="text-slate-200 font-semibold text-base mb-1">Anonymous</p>
+              <p className="text-white font-semibold text-base mb-1">Anonymous</p>
             )}
-            <p className="font-mono text-slate-400 text-sm mb-2">{shortenAddress(wallet)}</p>
+            <p className="font-mono text-white/40 text-sm mb-2">{shortenAddress(wallet)}</p>
             {freelancer && (
-              <p className="italic text-slate-400 text-xs mb-3">{freelancer.tagline}</p>
+              <p className="italic text-white/40 text-xs mb-3">{freelancer.tagline}</p>
             )}
             {freelancer && (
               <div className="flex items-center justify-center gap-1.5 mb-3">
                 <span className={`w-2 h-2 rounded-full ${availabilityColor}`} />
-                <span className="text-slate-300 text-xs">{availabilityLabel}</span>
+                <span className="text-white/60 text-xs">{availabilityLabel}</span>
               </div>
             )}
             <ReputationBadge score={rep.score} count={rep.count} />
             {freelancer && (
               <div className="mt-3 space-y-1.5">
                 <p className="font-mono text-[#dddddd] text-sm font-semibold">{freelancer.hourlyRate} XLM/hr</p>
-                <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs">
+                <div className="flex items-center justify-center gap-1.5 text-white/40 text-xs">
                   <Clock className="w-3 h-3" />
                   <span>{freelancer.responseTime}</span>
                 </div>
-                <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs">
+                <div className="flex items-center justify-center gap-1.5 text-white/40 text-xs">
                   <Star className="w-3 h-3" />
                   <span>{freelancer.totalEarned.toLocaleString()} XLM earned</span>
                 </div>
@@ -102,13 +102,14 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
             <Separator className="bg-slate-700 my-4" />
             <div className="flex flex-wrap gap-1.5 justify-center">
               {skills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="bg-white/8 text-slate-300 text-xs">{skill}</Badge>
+                <Badge key={skill} variant="secondary" className="bg-white/8 text-white/60 text-xs">{skill}</Badge>
               ))}
             </div>
             {wallet !== address && (
               <div className="mt-4">
                 <Button
-                  className="w-full bg-[#dddddd] text-black hover:bg-white font-semibold"
+                  variant="tile"
+                  className="w-full font-semibold"
                   onClick={() => setDialogOpen(true)}
                 >
                   Invite to Job
@@ -123,17 +124,17 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
           {/* Job history */}
           <Card className="glass">
             <CardHeader>
-              <CardTitle className="text-slate-200 text-base">Job History</CardTitle>
+              <CardTitle className="text-white text-base">Job History</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {profile.jobHistory.length === 0 ? (
-                <p className="text-slate-500 text-sm">No completed jobs yet.</p>
+                <p className="text-white/30 text-sm">No completed jobs yet.</p>
               ) : (
                 profile.jobHistory.map((j) => (
                   <div key={j.id} className="flex items-center justify-between p-3 rounded-lg glass">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <span className="text-slate-200 text-sm">{j.title}</span>
+                      <span className="text-white text-sm">{j.title}</span>
                     </div>
                     <span className="font-mono text-[#dddddd] text-sm font-semibold">{j.amount.toLocaleString()} XLM</span>
                   </div>
@@ -146,7 +147,7 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
           {freelancer && freelancer.portfolio.length > 0 && (
             <Card className="glass">
               <CardHeader>
-                <CardTitle className="text-slate-200 text-base flex items-center gap-2">
+                <CardTitle className="text-white text-base flex items-center gap-2">
                   <Zap className="w-4 h-4 text-[#dddddd]" />
                   Portfolio
                 </CardTitle>
@@ -155,10 +156,10 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
                 {freelancer.portfolio.map((item) => (
                   <div key={item.title} className="p-3 rounded-lg glass">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <span className="text-slate-200 text-sm font-bold">{item.title}</span>
-                      <Badge variant="secondary" className="bg-white/8 text-slate-300 text-xs shrink-0">{item.tag}</Badge>
+                      <span className="text-white text-sm font-bold">{item.title}</span>
+                      <Badge variant="secondary" className="bg-white/8 text-white/60 text-xs shrink-0">{item.tag}</Badge>
                     </div>
-                    <p className="text-slate-400 text-sm">{item.description}</p>
+                    <p className="text-white/40 text-sm">{item.description}</p>
                   </div>
                 ))}
               </CardContent>
@@ -171,7 +172,7 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="glass border-white/10 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-slate-200">Invite to a Job</DialogTitle>
+            <DialogTitle className="text-white">Invite to a Job</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {MOCK_JOBS.map((job) => (
@@ -184,25 +185,25 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
                     : 'hover:bg-white/5 border border-transparent'
                 }`}
               >
-                <p className="text-slate-200 text-sm font-medium">{job.title}</p>
-                <p className="text-slate-400 text-xs font-mono">{job.startingPrice.toLocaleString()} XLM starting</p>
+                <p className="text-white text-sm font-medium">{job.title}</p>
+                <p className="text-white/40 text-xs font-mono">{job.startingPrice.toLocaleString()} XLM starting</p>
               </div>
             ))}
           </div>
           <div className="mt-2">
-            <label className="text-slate-400 text-xs mb-1 block">Your offer (XLM)</label>
+            <label className="text-white/40 text-xs mb-1 block">Your offer (XLM)</label>
             <input
               type="number"
               value={offerAmount}
               onChange={(e) => setOfferAmount(Number(e.target.value))}
-              className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 text-slate-200 text-sm font-mono focus:outline-none focus:border-white/30"
+              className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-white/30"
             />
           </div>
           <DialogFooter className="gap-2 mt-2">
-            <Button variant="ghost" className="text-slate-400" onClick={() => setDialogOpen(false)}>
+            <Button variant="ghost" className="text-white/40" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button className="bg-[#dddddd] text-black hover:bg-white font-semibold" onClick={handleSendInvite}>
+            <Button variant="tile" className="font-semibold" onClick={handleSendInvite}>
               Send Invite
             </Button>
           </DialogFooter>

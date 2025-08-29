@@ -5,18 +5,20 @@ import Link from 'next/link'
 import { MOCK_JOBS, MOCK_BIDS, MOCK_CONTRACTS } from '@/lib/mock-data'
 import { useWalletStore } from '@/store/wallet'
 import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { PlusSquare, Briefcase, ChevronRight } from 'lucide-react'
+import { SlidingTabs } from '@/components/ui/sliding-tabs'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function statusColor(status: string) {
   if (status === 'open') return 'border-emerald-500/40 text-emerald-400'
   if (status === 'in_progress') return 'border-blue-500/40 text-blue-400'
-  if (status === 'completed') return 'border-slate-500/40 text-slate-400'
+  if (status === 'completed') return 'border-slate-500/40 text-white/40'
   if (status === 'active') return 'border-blue-500/40 text-blue-400'
   if (status === 'accepted') return 'border-emerald-500/40 text-emerald-400'
   if (status === 'rejected') return 'border-red-500/40 text-red-400'
-  return 'border-slate-500/40 text-slate-400'
+  return 'border-slate-500/40 text-white/40'
 }
 
 function ProgressBar({ milestones }: { milestones: { status: string }[] }) {
@@ -30,14 +32,14 @@ function ProgressBar({ milestones }: { milestones: { status: string }[] }) {
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs text-slate-500 font-mono shrink-0">{pct}%</span>
+      <span className="text-xs text-white/30 font-mono shrink-0">{pct}%</span>
     </div>
   )
 }
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="py-16 text-center text-slate-500">
+    <div className="py-16 text-center text-white/30">
       <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-30" />
       <p className="text-base mb-1">No jobs here</p>
       <p className="text-sm">{label}</p>
@@ -73,21 +75,11 @@ function ClientView({ me }: { me: string }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2 flex-wrap">
-        {CLIENT_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
-              filter === key
-                ? 'bg-[#dddddd] text-black border-[#dddddd]'
-                : 'border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        tabs={CLIENT_TABS.map(({ key, label }) => ({ id: key, label }))}
+        defaultActiveId={filter}
+        onChange={(id) => setFilter(id as ClientFilter)}
+      />
 
       {filtered.length === 0 ? (
         <EmptyState label={emptyLabels[filter]} />
@@ -104,12 +96,12 @@ function ClientView({ me }: { me: string }) {
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/app/jobs/${job.id}`}
-                      className="font-semibold text-slate-100 hover:text-white truncate block"
+                      className="font-semibold text-white hover:text-white truncate block"
                     >
                       {job.title}
                     </Link>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                      <Badge className="bg-white/8 text-slate-300 border-white/10 text-xs">{job.category}</Badge>
+                      <Badge className="bg-white/8 text-white/60 border-white/10 text-xs">{job.category}</Badge>
                       <Badge
                         variant="outline"
                         className={`text-xs capitalize ${statusColor(job.status)}`}
@@ -120,7 +112,7 @@ function ClientView({ me }: { me: string }) {
                   </div>
                   <Link
                     href={`/app/jobs/${job.id}`}
-                    className="shrink-0 flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors pt-0.5"
+                    className="shrink-0 flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors pt-0.5"
                   >
                     View Bids <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
@@ -130,10 +122,10 @@ function ClientView({ me }: { me: string }) {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono text-xs font-semibold">
                     from {job.startingPrice.toLocaleString()} XLM
                   </span>
-                  <span className="text-slate-500 text-xs">
+                  <span className="text-white/30 text-xs">
                     Budget: {job.budget.toLocaleString()} XLM
                   </span>
-                  <span className="text-slate-500 text-xs">
+                  <span className="text-white/30 text-xs">
                     Due {new Date(job.deadline).toLocaleDateString()}
                   </span>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold">
@@ -229,21 +221,11 @@ function FreelancerView({ me }: { me: string }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2 flex-wrap">
-        {FREELANCER_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
-              filter === key
-                ? 'bg-[#dddddd] text-black border-[#dddddd]'
-                : 'border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        tabs={FREELANCER_TABS.map(({ key, label }) => ({ id: key, label }))}
+        defaultActiveId={filter}
+        onChange={(id) => setFilter(id as FreelancerFilter)}
+      />
 
       {rows.length === 0 ? (
         <EmptyState label={emptyLabels[filter]} />
@@ -255,7 +237,7 @@ function FreelancerView({ me }: { me: string }) {
               className="rounded-xl border border-white/10 bg-white/4 backdrop-blur px-5 py-4 flex items-center justify-between gap-4 hover:border-white/20 transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-100 truncate">{row.title}</p>
+                <p className="font-semibold text-white truncate">{row.title}</p>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
                   <span className="font-mono text-amber-400 text-xs font-semibold">
                     {row.kind === 'bid'
@@ -272,7 +254,7 @@ function FreelancerView({ me }: { me: string }) {
               </div>
               <Link
                 href={row.kind === 'bid' ? `/app/jobs/${row.jobId}` : `/app/contracts/${row.contractId}`}
-                className="shrink-0 flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                className="shrink-0 flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors"
               >
                 View <ChevronRight className="w-3.5 h-3.5" />
               </Link>
@@ -295,28 +277,21 @@ export default function JobsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-white">My Jobs</h1>
+        <div>
+          <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-1">Work</p>
+          <h1 className="font-serif italic text-3xl text-white">My Jobs</h1>
+        </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-black/40 backdrop-blur border border-white/10 rounded-full px-1 py-1">
-            <button
-              onClick={() => setTab('posted')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                tab === 'posted' ? 'bg-[#dddddd] text-black' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Posted
-            </button>
-            <button
-              onClick={() => setTab('applied')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                tab === 'applied' ? 'bg-[#dddddd] text-black' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Applied
-            </button>
-          </div>
+          <SlidingTabs
+            tabs={[
+              { id: 'posted', label: 'Posted' },
+              { id: 'applied', label: 'Applied' },
+            ]}
+            defaultActiveId={tab}
+            onChange={(id) => setTab(id as 'posted' | 'applied')}
+          />
           {tab === 'posted' && (
-            <Link href="/app/jobs/new" className="inline-flex items-center gap-1.5 bg-[#dddddd] hover:bg-white text-black font-semibold h-9 px-4 text-sm rounded-lg transition-colors">
+            <Link href="/app/jobs/new" className={buttonVariants({ variant: 'tile', className: 'inline-flex items-center gap-1.5 font-semibold h-9 px-4 text-sm' })}>
               <PlusSquare className="w-4 h-4" />
               Post a Job
             </Link>

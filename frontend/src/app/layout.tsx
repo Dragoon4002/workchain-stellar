@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-black text-slate-100 antialiased">
+      <body className="min-h-screen bg-black text-white antialiased">
         <Providers>
           {children}
         </Providers>
