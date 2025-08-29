@@ -6,6 +6,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Symbol};
 pub enum DataKey {
     TotalScore(Address),
     Count(Address),
+    EscrowContract,
 }
 
 #[contract]
@@ -13,9 +14,20 @@ pub struct ReputationContract;
 
 #[contractimpl]
 impl ReputationContract {
+    /// Store escrow contract address; must be called once after deployment.
+    pub fn initialize(env: Env, escrow_contract: Address) {
+        // ponytail: no re-init guard — add if multi-deploy scenarios arise
+        env.storage().persistent().set(&DataKey::EscrowContract, &escrow_contract);
+    }
+
     /// Record a score for a wallet; maintains running total for average.
     pub fn record(env: Env, wallet: Address, score: i32, job_id: u32) {
-        // ponytail: no caller auth — caller pattern depends on governance design; add when role model is defined
+        let escrow_addr: Address = env
+            .storage()
+            .persistent()
+            .get(&DataKey::EscrowContract)
+            .expect("not initialized");
+        escrow_addr.require_auth();
         let total: i32 = env
             .storage()
             .persistent()
