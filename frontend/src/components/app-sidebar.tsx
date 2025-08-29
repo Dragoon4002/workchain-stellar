@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion, LayoutGroup } from 'motion/react'
 import { useWalletStore } from '@/store/wallet'
 import { shortenAddress } from '@/lib/wallet'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   Zap, LayoutDashboard, Compass, PlusSquare,
-  FileText, User, LogOut, Copy, Wallet, MessageSquare, Users, Briefcase,
+  FileText, User, LogOut, Copy, Wallet, MessageSquare, Users, Briefcase, BarChart2,
 } from 'lucide-react'
 
 const NAV = [
@@ -35,6 +36,12 @@ const NAV = [
       { href: '/app/profile',   label: 'My Profile',   icon: User },
     ],
   },
+  {
+    section: 'DevOps',
+    items: [
+      { href: '/app/admin', label: 'Analytics', icon: BarChart2 },
+    ],
+  },
 ]
 
 function NavItem({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
@@ -44,21 +51,22 @@ function NavItem({ href, label, icon: Icon }: { href: string; label: string; ico
   return (
     <Link
       href={href}
-      className={`
-        flex items-center gap-3 px-3 py-2.5 rounded-full w-full
-        transition-colors duration-150
-        ${active ? 'bg-white/10' : 'bg-white/[0.03] hover:bg-white/[0.06]'}
-      `}
+      className="relative flex items-center gap-3 px-3 py-2.5 rounded-full w-full transition-colors duration-150 hover:bg-white/[0.04]"
     >
-      {/* Icon circle */}
+      {active && (
+        <motion.div
+          layoutId="sidebar-active-pill"
+          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.9 }}
+          className="absolute inset-0 rounded-full bg-white/8 border border-white/10"
+        />
+      )}
       <div className={`
-        w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors
-        ${active ? 'bg-[#dddddd]' : 'bg-white/8'}
+        relative w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors
+        ${active ? 'bg-white/15' : 'bg-white/5'}
       `}>
-        <Icon className={`w-[18px] h-[18px] ${active ? 'text-black' : 'text-slate-400'}`} />
+        <Icon className={`w-[18px] h-[18px] ${active ? 'text-white' : 'text-white/40'}`} />
       </div>
-
-      <span className={`text-sm font-medium ${active ? 'text-white' : 'text-slate-400'}`}>
+      <span className={`relative text-sm font-medium transition-colors ${active ? 'text-white' : 'text-white/40'}`}>
         {label}
       </span>
     </Link>
@@ -73,7 +81,8 @@ function WalletSection() {
       <Button
         onClick={connect}
         disabled={connecting}
-        className="w-full rounded-full bg-[#dddddd] hover:bg-white text-black font-semibold"
+        variant="tile"
+        className="w-full rounded-full font-semibold"
       >
         <Wallet className="w-4 h-4 mr-2" />
         {connecting ? 'Connecting...' : 'Connect Wallet'}
@@ -87,11 +96,11 @@ function WalletSection() {
         render={
           <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-full bg-white/[0.03] hover:bg-white/[0.06] transition-colors text-left">
             <div className="w-9 h-9 rounded-full bg-white/8 flex items-center justify-center shrink-0">
-              <Wallet className="w-[18px] h-[18px] text-slate-400" />
+              <Wallet className="w-[18px] h-[18px] text-white/40" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 leading-none mb-0.5">Connected</p>
-              <p className="text-sm font-mono text-slate-300 truncate">{shortenAddress(address)}</p>
+              <p className="text-xs text-white/40 leading-none mb-0.5">Connected</p>
+              <p className="text-sm font-mono text-white/40 truncate">{shortenAddress(address)}</p>
             </div>
           </button>
         }
@@ -99,7 +108,7 @@ function WalletSection() {
       <DropdownMenuContent side="top" align="start" className="w-52 glass mb-2">
         <DropdownMenuItem
           onClick={() => navigator.clipboard.writeText(address)}
-          className="text-slate-200 hover:bg-white/8 cursor-pointer"
+          className="text-white/40 hover:bg-white/8 cursor-pointer"
         >
           <Copy className="w-4 h-4 mr-2" />
           Copy Address
@@ -124,9 +133,9 @@ function LogOutButton() {
       className="flex items-center gap-3 px-3 py-2.5 rounded-full w-full bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
     >
       <div className="w-9 h-9 rounded-full bg-white/8 flex items-center justify-center shrink-0">
-        <LogOut className="w-[18px] h-[18px] text-slate-400" />
+        <LogOut className="w-[18px] h-[18px] text-white/40" />
       </div>
-      <span className="text-sm font-medium text-slate-400">Log Out</span>
+      <span className="text-sm font-medium text-white/40">Log Out</span>
     </button>
   )
 }
@@ -147,16 +156,18 @@ export function AppSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
-        {NAV.map(({ section, items }) => (
-          <div key={section}>
-            <p className="px-3 mb-2 text-xs font-medium text-slate-600 tracking-wide">{section}</p>
-            <div className="space-y-1">
-              {items.map((item) => <NavItem key={item.href} {...item} />)}
+      <LayoutGroup>
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
+          {NAV.map(({ section, items }) => (
+            <div key={section}>
+              <p className="px-3 mb-2 text-xs font-medium text-white/40 tracking-wide">{section}</p>
+              <div className="space-y-1">
+                {items.map((item) => <NavItem key={item.href} {...item} />)}
+              </div>
             </div>
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
+      </LayoutGroup>
 
       {/* Bottom */}
       <div className="px-3 pb-5 pt-3 border-t border-white/6 space-y-2">
@@ -166,7 +177,8 @@ export function AppSidebar() {
           : (
             <Button
               onClick={() => useWalletStore.getState().connect()}
-              className="w-full rounded-full bg-[#dddddd] hover:bg-white text-black font-semibold"
+              variant="tile"
+              className="w-full rounded-full font-semibold"
             >
               <Wallet className="w-4 h-4 mr-2" />
               Connect Wallet
