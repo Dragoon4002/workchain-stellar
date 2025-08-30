@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { MOCK_JOBS, MOCK_BIDS, MOCK_CONTRACTS, type Bid } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
+import { threadId, sendMessage } from '@/lib/messages'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { SlidingTabs } from '@/components/ui/sliding-tabs'
@@ -90,16 +91,31 @@ function BidCard({ bid, startingPrice, onSelect }: {
 
 type Relationship = 'owner' | 'assigned' | 'bidder' | 'stranger'
 
-function CTASidebar({ job, relationship, myBid }: {
+function CTASidebar({ job, relationship, myBid, me }: {
   job: typeof MOCK_JOBS[0]
   relationship: Relationship
   myBid: Bid | undefined
+  me: string
 }) {
   const [proposal, setProposal] = useState('')
   const [price, setPrice] = useState('')
   const [timeline, setTimeline] = useState('')
   const [reportOpen, setReportOpen] = useState(false)
   const [reportText, setReportText] = useState('')
+
+  const tid = threadId(job.id, me, job.clientAddress)
+
+  async function openOrCreateThread() {
+    // Ensure thread exists before navigating; sendMessage upserts it
+    await sendMessage({
+      thread_id: tid,
+      sender: me,
+      body: `Hi, I'm reaching out about "${job.title}".`,
+      job_id: job.id,
+      participants: [me, job.clientAddress],
+    })
+    window.location.href = `/app/messages/${tid}`
+  }
 
   return (
     <Card className="glass sticky top-6">
@@ -149,12 +165,13 @@ function CTASidebar({ job, relationship, myBid }: {
               <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm text-emerald-300 font-medium">You&apos;re hired for this job</span>
             </div>
-            <Link
-              href="/app/messages"
-              className={buttonVariants({ variant: 'tile', className: 'flex items-center justify-center gap-2 w-full font-semibold text-sm' })}
+            <Button
+              onClick={openOrCreateThread}
+              variant="tile"
+              className="flex items-center justify-center gap-2 w-full font-semibold text-sm"
             >
               <MessageSquare className="w-4 h-4" /> Message Client
-            </Link>
+            </Button>
             <button
               onClick={() => setReportOpen(true)}
               className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-white/40 hover:text-red-400 font-medium text-sm transition-colors"
@@ -306,6 +323,12 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     : new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   )
 
+  // Bid stats
+  const bidAmounts = bids.map((b) => b.price).sort((a, b) => a - b)
+  const bidMin = bidAmounts[0]
+  const bidMax = bidAmounts[bidAmounts.length - 1]
+  const bidMedian = bidAmounts[Math.floor(bidAmounts.length / 2)]
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="grid lg:grid-cols-3 gap-8">
@@ -331,6 +354,19 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Job</p>
             <h1 className="font-serif italic text-3xl text-white mb-3">{job.title}</h1>
             <p className="text-white/40 leading-relaxed">{job.description}</p>
+
+            {/* Bid stats row */}
+            {bids.length === 0 ? (
+              <p className="mt-3 text-xs font-mono text-white/30">Be the first to bid!</p>
+            ) : (
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs font-mono">
+                <span className="text-white/30">{bids.length} bid{bids.length !== 1 ? 's' : ''}</span>
+                <span className="text-white/20">·</span>
+                <span className="text-white/30">Range <span className="text-white/60">{bidMin.toLocaleString()}–{bidMax.toLocaleString()} XLM</span></span>
+                <span className="text-white/20">·</span>
+                <span className="text-white/30">Median <span className="text-white/60">{bidMedian.toLocaleString()} XLM</span></span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -407,7 +443,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
         {/* ── Sidebar ── */}
         <div>
-          <CTASidebar job={job} relationship={relationship} myBid={myBid} />
+          <CTASidebar job={job} relationship={relationship} myBid={myBid} me={me} />
         </div>
       </div>
 
