@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react'
 import { MOCK_PROFILES, MOCK_FREELANCERS, MOCK_JOBS, FreelancerListing } from '@/lib/mock-data'
+import { getReviews, Review } from '@/lib/reviews'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { ReputationBadge } from '@/components/reputation-badge'
@@ -23,6 +24,7 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState<string>(MOCK_JOBS[0]?.id ?? '')
   const [offerAmount, setOfferAmount] = useState<number>(MOCK_JOBS[0]?.startingPrice ?? 0)
+  const [reviews, setReviews] = useState<Review[]>([])
 
   useEffect(() => {
     if (!wallet || !address) return
@@ -30,6 +32,14 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
       getReputation(address, wallet).then(setRep).catch(() => {})
     })
   }, [wallet, address])
+
+  useEffect(() => {
+    setReviews(getReviews(wallet))
+  }, [wallet])
+
+  const avgStars = reviews.length
+    ? Math.round((reviews.reduce((s, r) => s + r.stars, 0) / reviews.length) * 10) / 10
+    : null
 
   const skills = freelancer?.skills ?? profile.skills
   const availabilityColor = freelancer?.availability === 'available'
@@ -86,6 +96,13 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
               </div>
             )}
             <ReputationBadge score={rep.score} count={rep.count} />
+            {avgStars !== null && (
+              <div className="mt-2 flex items-center justify-center gap-1.5">
+                <span className="text-amber-400 text-xl font-bold">{avgStars}</span>
+                <span className="text-amber-400 text-base">{'★'.repeat(Math.round(avgStars))}{'☆'.repeat(5 - Math.round(avgStars))}</span>
+                <span className="text-white/30 text-xs">({reviews.length})</span>
+              </div>
+            )}
             {freelancer && (
               <div className="mt-3 space-y-1.5">
                 <p className="font-mono text-[#dddddd] text-sm font-semibold">{freelancer.hourlyRate} XLM/hr</p>
@@ -165,6 +182,31 @@ export default function ProfilePage({ params }: { params: Promise<{ wallet: stri
               </CardContent>
             </Card>
           )}
+          {/* Reviews */}
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle className="text-white text-base">Reviews</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {reviews.length === 0 ? (
+                <p className="text-white/30 text-sm">No reviews yet.</p>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="p-3 rounded-lg glass space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-amber-400 text-sm">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</span>
+                      <span className="text-white/30 text-xs font-mono">
+                        {new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                    <p className="text-white/60 text-xs">{r.job_title}</p>
+                    <p className="text-white/80 text-sm">{r.text}</p>
+                    <p className="text-white/30 text-xs font-mono">{shortenAddress(r.reviewer)}</p>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 

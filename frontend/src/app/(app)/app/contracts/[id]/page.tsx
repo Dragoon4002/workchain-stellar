@@ -1,11 +1,12 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { MOCK_CONTRACTS } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { MilestoneTracker } from '@/components/milestone-tracker'
+import { ReviewModal } from '@/components/review-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,6 +31,8 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   // ponytail: milestoneId is index for mock; swap for milestone.id (numeric) when loaded from chain
   const activeMilestoneId = contract.milestones.findIndex(m => m.status === 'active')
 
+  const [reviewOpen, setReviewOpen] = useState(false)
+
   async function handleSubmitWork() {
     if (!address) return
     const proofUrl = prompt('Enter proof URL (GitHub link, Figma, etc):')
@@ -49,7 +52,13 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
       const { approveMilestone, releaseEscrow } = await import('@/lib/contracts')
       await approveMilestone(address, activeMilestoneId)
       await releaseEscrow(address, activeMilestoneId)
-      alert('Milestone approved and escrow released!')
+      // if this was the last milestone, prompt for review
+      const isLast = activeMilestoneId === contract.milestones.length - 1
+      if (isLast) {
+        setReviewOpen(true)
+      } else {
+        alert('Milestone approved and escrow released!')
+      }
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Transaction failed')
     }
@@ -67,6 +76,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   }
 
   return (
+    <>
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-6">
         <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Contract</p>
@@ -152,5 +162,17 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
     </div>
+
+    {isClient && (
+      <ReviewModal
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        reviewer={me}
+        freelancer={contract.freelancerAddress}
+        job_id={contract.id}
+        job_title={contract.jobTitle}
+      />
+    )}
+    </>
   )
 }
