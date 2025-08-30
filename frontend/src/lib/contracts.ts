@@ -152,6 +152,14 @@ export async function approveMilestone(caller: string, milestoneId: number) {
   ])
 }
 
+export async function requestRevision(caller: string, milestoneId: number, feedback: string) {
+  return invoke(caller, CONTRACT_ADDRESSES.milestone, 'request_revision', [
+    new Address(caller).toScVal(),
+    nativeToScVal(milestoneId, { type: 'u32' }),
+    nativeToScVal(feedback, { type: 'string' }),
+  ])
+}
+
 export async function disputeMilestone(caller: string, milestoneId: number) {
   return invoke(caller, CONTRACT_ADDRESSES.milestone, 'dispute', [
     new Address(caller).toScVal(),

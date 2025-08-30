@@ -9,6 +9,7 @@ const STATUS_CONFIG = {
   approved: { icon: Check, color: 'text-emerald-500', bg: 'bg-emerald-500', label: 'Approved' },
   submitted: { icon: Clock, color: 'text-[#dddddd]', bg: 'bg-white/20', label: 'Submitted' },
   active: { icon: Circle, color: 'text-[#dddddd]', bg: 'bg-white/10 border-2 border-[#dddddd]/50', label: 'Active' },
+  revision_requested: { icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/20', label: 'Revision Requested' },
   disputed: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500', label: 'Disputed' },
   pending: { icon: Circle, color: 'text-white/30', bg: 'bg-white/8', label: 'Pending' },
 }

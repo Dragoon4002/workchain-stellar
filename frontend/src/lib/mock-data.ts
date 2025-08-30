@@ -47,7 +47,8 @@ export interface Milestone {
   id: string
   description: string
   amount: number
-  status: 'pending' | 'active' | 'submitted' | 'approved' | 'disputed'
+  status: 'pending' | 'active' | 'submitted' | 'approved' | 'revision_requested' | 'disputed'
+  revision_feedback?: string
 }
 
 export interface Contract {
@@ -222,7 +223,7 @@ export const MOCK_CONTRACTS: Contract[] = [
     status: 'active',
     milestones: [
       { id: 'm1', description: 'UI/UX design and prototyping', amount: 1500, status: 'approved' },
-      { id: 'm2', description: 'Wallet creation and key management', amount: 2000, status: 'submitted' },
+      { id: 'm2', description: 'Wallet creation and key management', amount: 2000, status: 'revision_requested', revision_feedback: 'Biometric auth is missing on Android 11. Please add react-native-biometrics and resubmit.' },
       { id: 'm3', description: 'Send/receive flows', amount: 2500, status: 'active' },
       { id: 'm4', description: 'Polish and app store submission', amount: 2000, status: 'pending' },
     ],
