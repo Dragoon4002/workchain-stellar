@@ -15,22 +15,29 @@ import {
 import {
   Zap, LayoutDashboard, Compass, PlusSquare,
   FileText, User, LogOut, Copy, Wallet, MessageSquare, Users, Briefcase, BarChart2,
+  FolderOpen,
 } from 'lucide-react'
 
 const NAV = [
   {
-    section: 'Main',
+    section: 'Projects',
     items: [
-      { href: '/app/dashboard',   label: 'Dashboard',      icon: LayoutDashboard },
-      { href: '/app/explore',     label: 'Explore Jobs',   icon: Compass },
-      { href: '/app/freelancers', label: 'Find Talent',    icon: Users },
-      { href: '/app/jobs/new',    label: 'Post a Job',     icon: PlusSquare },
+      { href: '/app/projects',     label: 'My Projects',    icon: FolderOpen },
+      { href: '/app/projects/new', label: 'New Project',    icon: PlusSquare },
+      { href: '/app/dashboard',    label: 'Dashboard',      icon: LayoutDashboard },
     ],
   },
   {
-    section: 'Work',
+    section: 'Marketplace',
     items: [
-      { href: '/app/jobs',      label: 'My Jobs',      icon: Briefcase },
+      { href: '/app/explore',     label: 'Explore Jobs',   icon: Compass },
+      { href: '/app/jobs',        label: 'My Jobs',        icon: Briefcase },
+      { href: '/app/freelancers', label: 'Find Talent',    icon: Users },
+    ],
+  },
+  {
+    section: 'Account',
+    items: [
       { href: '/app/contracts', label: 'Contracts',    icon: FileText },
       { href: '/app/messages',  label: 'Messages',     icon: MessageSquare },
       { href: '/app/profile',   label: 'My Profile',   icon: User },

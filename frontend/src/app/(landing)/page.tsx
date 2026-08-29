@@ -120,23 +120,23 @@ export default function HomePage() {
         <div className="relative z-10 flex items-center justify-between px-8 py-5">
           <span className="text-white/50 text-xs uppercase tracking-[0.25em] font-mono">WorkChain · 2026</span>
           <div className="flex items-center gap-8">
+            <Link href="/app/projects" className="text-white/60 text-xs uppercase tracking-[0.2em] font-mono hover:text-white transition-colors">Projects</Link>
+            <Link href="/app/projects/new" className="text-white/60 text-xs uppercase tracking-[0.2em] font-mono hover:text-white transition-colors">New Project</Link>
             <Link href="/app/explore" className="text-white/60 text-xs uppercase tracking-[0.2em] font-mono hover:text-white transition-colors">Explore</Link>
-            <Link href="/app/freelancers" className="text-white/60 text-xs uppercase tracking-[0.2em] font-mono hover:text-white transition-colors">Talent</Link>
-            <Link href="/app/jobs/new" className="text-white/60 text-xs uppercase tracking-[0.2em] font-mono hover:text-white transition-colors">Post Job</Link>
           </div>
           <span className="text-white/30 text-xs uppercase tracking-[0.25em] font-mono">Built on Stellar</span>
         </div>
 
         {/* Centre content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4">
-          <p className="text-white/50 text-sm uppercase tracking-[0.3em] font-mono mb-6">Decentralized Freelance Marketplace</p>
+          <p className="text-white/50 text-sm uppercase tracking-[0.3em] font-mono mb-6">Programmable Project Settlement on Stellar</p>
           <h1
             className="text-[clamp(4rem,14vw,11rem)] font-bold leading-none tracking-tight text-white mb-4"
             style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}
           >
             WorkChain
           </h1>
-          <p className="text-white/50 text-sm uppercase tracking-[0.3em] font-mono mb-10">No Fees · No Banks · No Middlemen</p>
+          <p className="text-white/50 text-sm uppercase tracking-[0.3em] font-mono mb-10">Multi-Party Treasuries · Milestone Escrow · Auto-Settlement</p>
           <div className="flex items-center gap-4">
             <Link
               href="/app/explore"

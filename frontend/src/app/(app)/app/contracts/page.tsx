@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { MOCK_CONTRACTS } from '@/lib/mock-data'
+import { useWalletStore } from '@/store/wallet'
 import { shortenAddress } from '@/lib/wallet'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -17,20 +17,38 @@ function statusBadge(status: string) {
   return <Badge className="bg-red-500/15 text-red-400 border-red-500/30 capitalize">{status}</Badge>
 }
 
+// ponytail: localStorage index — no chain indexer available
+function getEscrowIds(wallet: string): number[] {
+  if (typeof window === 'undefined') return []
+  try { return JSON.parse(localStorage.getItem(`workchain:escrows:${wallet}`) ?? '[]') } catch { return [] }
+}
+
 export default function ContractsPage() {
+  const { address } = useWalletStore()
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [contracts, setContracts] = useState<any[]>([])
+
+  useEffect(() => {
+    if (!address) return
+    const ids = getEscrowIds(address)
+    // no ids yet — empty list is correct
+    if (!ids.length) return
+    // future: load from chain per escrow_id
+    setContracts(ids.map((id) => ({ id: String(id), jobTitle: `Escrow #${id}`, clientAddress: '', freelancerAddress: '', totalAmount: 0, lockedAmount: 0, status: 'active', milestones: [] })))
+  }, [address])
 
   const filtered = useMemo(() => {
-    return MOCK_CONTRACTS.filter((c) => {
+    return contracts.filter((c) => {
       const matchFilter = filter === 'all' || c.status === filter
       const matchSearch = c.jobTitle.toLowerCase().includes(search.toLowerCase())
       return matchFilter && matchSearch
     })
-  }, [filter, search])
+  }, [filter, search, contracts])
 
-  const totalActive = MOCK_CONTRACTS.filter((c) => c.status === 'active').length
-  const totalLocked = MOCK_CONTRACTS.reduce((sum, c) => sum + c.lockedAmount, 0)
+  const totalActive = contracts.filter((c) => c.status === 'active').length
+  const totalLocked = contracts.reduce((sum: number, c) => sum + c.lockedAmount, 0)
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -38,14 +56,14 @@ export default function ContractsPage() {
       <div className="mb-6">
         <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30 mb-2">Escrow</p>
         <h1 className="font-serif italic text-4xl text-white mb-1">Contracts</h1>
-        <p className="text-white/40 font-mono text-sm">{MOCK_CONTRACTS.length} total · {totalActive} active</p>
+        <p className="text-white/40 font-mono text-sm">{contracts.length} total · {totalActive} active</p>
       </div>
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <div className="bg-white/5 border border-white/8 rounded-xl px-4 py-3">
           <p className="text-xs text-white/40 mb-1">Total Contracts</p>
-          <p className="text-xl font-semibold text-white">{MOCK_CONTRACTS.length}</p>
+          <p className="text-xl font-semibold text-white">{contracts.length}</p>
         </div>
         <div className="bg-white/5 border border-white/8 rounded-xl px-4 py-3">
           <p className="text-xs text-white/40 mb-1">Active</p>
@@ -53,7 +71,7 @@ export default function ContractsPage() {
         </div>
         <div className="bg-white/5 border border-white/8 rounded-xl px-4 py-3">
           <p className="text-xs text-white/40 mb-1">Completed</p>
-          <p className="text-xl font-semibold text-emerald-400">{MOCK_CONTRACTS.filter((c) => c.status === 'completed').length}</p>
+          <p className="text-xl font-semibold text-emerald-400">{contracts.filter((c: {status: string}) => c.status === 'completed').length}</p>
         </div>
         <div className="bg-white/5 border border-white/8 rounded-xl px-4 py-3">
           <p className="text-xs text-white/40 mb-1 flex items-center gap-1"><Lock className="w-3 h-3" />Total Locked</p>
@@ -106,7 +124,8 @@ export default function ContractsPage() {
             </div>
 
             {filtered.map((contract) => {
-              const approved = contract.milestones.filter((m) => m.status === 'approved').length
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const approved = contract.milestones.filter((m: any) => m.status === 'approved').length
               const progress = Math.round((approved / contract.milestones.length) * 100)
 
               return (

@@ -218,27 +218,6 @@ This section will be updated with real user feedback after the onboarding period
 
 ---
 
-## Commits
-
-| # | Commit | Description |
-|---|---|---|
-| 1 | `6a0df5a` | Implement all 4 Soroban contracts |
-| 2 | `51db31b` | Scaffold Next.js frontend with wallet integration |
-| 3 | `f40442b` | Build + deploy contracts to testnet |
-| 4 | `91a914a` | Wire real Soroban contract calls into UI |
-| 5 | `0716cc2` | Client + Freelancer escrow resolver, UI improvements |
-| 6 | `bc6e633` | Add client-side analytics lib |
-| 7 | `2b5e9b4` | Add /api/analytics server route |
-| 8 | `dcd8e5e` | Add /api/feedback server route |
-| 9 | `0bde24d` | Add AnalyticsTracker component |
-| 10 | `3f41389` | Add FeedbackWidget with star rating |
-| 11 | `6f81b00` | Add ErrorBoundary with edge toast |
-| 12 | `4054406` | Add /app/admin analytics dashboard |
-| 13 | `346b38b` | Wire analytics + feedback into app layout |
-| 14 | `c5c27b5` | Fix Vercel deployment config |
-
----
-
 ## License
 
 MIT

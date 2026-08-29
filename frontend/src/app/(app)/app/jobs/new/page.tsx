@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, KeyboardEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import { useWalletStore } from '@/store/wallet'
+import { postJob } from '@/lib/contracts'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,7 +30,16 @@ interface FormErrors {
   milestones?: string
 }
 
+function addJobId(wallet: string, id: number) {
+  if (typeof window === 'undefined') return
+  const key = `workchain:jobs:${wallet}`
+  const existing: number[] = JSON.parse(localStorage.getItem(key) ?? '[]')
+  if (!existing.includes(id)) localStorage.setItem(key, JSON.stringify([...existing, id]))
+}
+
 export default function NewJobPage() {
+  const router = useRouter()
+  const { address } = useWalletStore()
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<Category | ''>('')
   const [description, setDescription] = useState('')
@@ -70,13 +82,19 @@ export default function NewJobPage() {
     return e
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const e = validate()
     setErrors(e)
     setSubmitted(true)
-    if (Object.keys(e).length > 0) return
-    const formData = { title, category, description, startingPrice: Number(startingPrice), deadline, milestones, tags }
-    console.log(formData)
+    if (Object.keys(e).length > 0 || !address) return
+    try {
+      const deadlineUnix = Math.floor(new Date(deadline).getTime() / 1000)
+      const jobId = await postJob(address, title, description, Number(startingPrice), deadlineUnix)
+      addJobId(address, jobId)
+      router.push(`/app/jobs/${jobId}`)
+    } catch (err) {
+      setErrors({ title: String(err) })
+    }
   }
 
   const milestoneTotal = milestones.reduce((s, m) => s + (Number(m.amount) || 0), 0)

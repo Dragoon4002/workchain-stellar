@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { MOCK_JOBS, MOCK_BIDS, MOCK_CONTRACTS } from '@/lib/mock-data'
 import { useWalletStore } from '@/store/wallet'
+import { getJob, stroopsToXlm } from '@/lib/contracts'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { PlusSquare, Briefcase, ChevronRight } from 'lucide-react'
@@ -50,12 +50,41 @@ function EmptyState({ label }: { label: string }) {
 type ClientFilter = 'all' | 'open' | 'in_progress' | 'completed'
 type FreelancerFilter = 'all' | 'applied' | 'active' | 'completed'
 
+function getStoredIds(key: string): number[] {
+  if (typeof window === 'undefined') return []
+  try { return JSON.parse(localStorage.getItem(key) ?? '[]') } catch { return [] }
+}
+
 // ── CLIENT VIEW ───────────────────────────────────────────────────────────────
 
 function ClientView({ me }: { me: string }) {
   const [filter, setFilter] = useState<ClientFilter>('all')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [chainJobs, setChainJobs] = useState<any[]>([])
+  const [loadingJobs, setLoadingJobs] = useState(false)
 
-  const myJobs = MOCK_JOBS.filter((j) => j.clientAddress === me)
+  useEffect(() => {
+    const ids = getStoredIds(`workchain:jobs:${me}`)
+    if (!ids.length) return
+    setLoadingJobs(true)
+    Promise.all(ids.map((id) => getJob(me, id).then((data) => ({ id, data }))))
+      .then(setChainJobs)
+      .catch(console.error)
+      .finally(() => setLoadingJobs(false))
+  }, [me])
+
+  // map chain data to display shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const myJobs = chainJobs.map(({ id, data }: any) => ({
+    id: String(id),
+    title: data?.title ?? `Job #${id}`,
+    budget: data?.budget ? stroopsToXlm(data.budget) : 0,
+    startingPrice: data?.budget ? stroopsToXlm(data.budget) : 0,
+    deadline: data?.deadline ? new Date(Number(data.deadline) * 1000).toISOString() : '',
+    status: data?.state === 0 ? 'open' : data?.state === 1 ? 'in_progress' : 'completed',
+    clientAddress: me,
+    milestones: [] as { status: string }[],
+  }))
 
   const filtered = filter === 'all' ? myJobs : myJobs.filter((j) => j.status === filter)
 
@@ -81,12 +110,14 @@ function ClientView({ me }: { me: string }) {
         onChange={(id) => setFilter(id as ClientFilter)}
       />
 
-      {filtered.length === 0 ? (
+      {loadingJobs ? (
+        <div className="py-16 text-center text-white/30 font-mono text-sm">Loading jobs…</div>
+      ) : filtered.length === 0 ? (
         <EmptyState label={emptyLabels[filter]} />
       ) : (
         <div className="space-y-3">
           {filtered.map((job) => {
-            const bids = MOCK_BIDS.filter((b) => b.jobId === job.id)
+            const bids: { jobId: string }[] = []
             return (
               <div
                 key={job.id}
@@ -101,7 +132,8 @@ function ClientView({ me }: { me: string }) {
                       {job.title}
                     </Link>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                      <Badge className="bg-white/8 text-white/60 border-white/10 text-xs">{job.category}</Badge>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      <Badge className="bg-white/8 text-white/60 border-white/10 text-xs">{(job as any).category ?? 'Job'}</Badge>
                       <Badge
                         variant="outline"
                         className={`text-xs capitalize ${statusColor(job.status)}`}
@@ -147,16 +179,13 @@ function ClientView({ me }: { me: string }) {
 
 // ── FREELANCER VIEW ───────────────────────────────────────────────────────────
 
-function FreelancerView({ me }: { me: string }) {
+function FreelancerView({ me: _ }: { me: string }) {
   const [filter, setFilter] = useState<FreelancerFilter>('all')
 
-  const myBids = MOCK_BIDS.filter((b) => b.freelancerAddress === me)
-  const appliedJobIds = new Set(myBids.map((b) => b.jobId))
-  const appliedJobs = MOCK_JOBS.filter((j) => appliedJobIds.has(j.id))
-
-  const myContracts = MOCK_CONTRACTS.filter((c) => c.freelancerAddress === me)
-  const activeContracts = myContracts.filter((c) => c.status === 'active')
-  const completedContracts = myContracts.filter((c) => c.status === 'completed')
+  const myBids: never[] = []
+  const appliedJobs: never[] = []
+  const activeContracts: never[] = []
+  const completedContracts: never[] = []
 
   const FREELANCER_TABS: { key: FreelancerFilter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -178,41 +207,32 @@ function FreelancerView({ me }: { me: string }) {
     | { kind: 'contract'; contractId: string; title: string; amount: number; status: 'active' | 'completed' }
 
   function buildRows(): Row[] {
+    // ponytail: no indexer — applied/active/completed pulled from localStorage when available
     if (filter === 'all') {
-      const bidRows: Row[] = appliedJobs.map((j) => {
-        const bid = myBids.find((b) => b.jobId === j.id)!
-        return { kind: 'bid', jobId: j.id, title: j.title, price: bid.price, status: 'pending' }
-      })
-      const contractRows: Row[] = myContracts.map((c) => ({
-        kind: 'contract',
-        contractId: c.id,
-        title: c.jobTitle,
-        amount: c.totalAmount,
-        status: c.status as 'active' | 'completed',
+      const bidRows: Row[] = appliedJobs.map((j) => ({
+        kind: 'bid', jobId: String(j), title: String(j), price: 0, status: 'pending' as const,
+      }))
+      const contractRows: Row[] = activeContracts.map((c) => ({
+        kind: 'contract', contractId: String(c), title: String(c), amount: 0, status: 'active' as const,
       }))
       return [...bidRows, ...contractRows]
     }
-    if (filter === 'applied') {
-      return appliedJobs.map((j) => {
-        const bid = myBids.find((b) => b.jobId === j.id)!
-        return { kind: 'bid', jobId: j.id, title: j.title, price: bid.price, status: 'pending' }
-      })
-    }
+    if (filter === 'applied') return []
     if (filter === 'active') {
       return activeContracts.map((c) => ({
         kind: 'contract',
-        contractId: c.id,
-        title: c.jobTitle,
-        amount: c.totalAmount,
+        contractId: String(c),
+        title: String(c),
+        amount: 0,
         status: 'active' as const,
       }))
     }
     // completed
     return completedContracts.map((c) => ({
       kind: 'contract',
-      contractId: c.id,
-      title: c.jobTitle,
-      amount: c.totalAmount,
+      contractId: String(c),
+      title: String(c),
+      amount: 0,
       status: 'completed' as const,
     }))
   }
@@ -270,8 +290,7 @@ function FreelancerView({ me }: { me: string }) {
 
 export default function JobsPage() {
   const { address } = useWalletStore()
-  // ponytail: fall back to mock address so UI is always populated
-  const me = address ?? 'GYOUR_ADDRESS_HERE'
+  const me = address ?? ''
   const [tab, setTab] = useState<'posted' | 'applied'>('posted')
 
   return (

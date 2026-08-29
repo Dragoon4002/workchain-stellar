@@ -198,6 +198,127 @@ export async function cancelEscrow(caller: string, milestoneId: number) {
   ])
 }
 
+// ── Project Vault contract ────────────────────────────────────
+
+export interface VaultParticipant {
+  wallet: string
+  bps: number // basis points, 10000 = 100%
+}
+
+export async function createVault(
+  caller: string,
+  token: string,
+  totalXlm: number,
+  participants: VaultParticipant[]
+): Promise<number> {
+  const participantsScVal = xdr.ScVal.scvVec(
+    participants.map((p) =>
+      xdr.ScVal.scvMap([
+        new xdr.ScMapEntry({
+          key: nativeToScVal('wallet', { type: 'symbol' }),
+          val: new Address(p.wallet).toScVal(),
+        }),
+        new xdr.ScMapEntry({
+          key: nativeToScVal('bps', { type: 'symbol' }),
+          val: nativeToScVal(p.bps, { type: 'u32' }),
+        }),
+      ])
+    )
+  )
+
+  const result = await invoke(caller, CONTRACT_ADDRESSES.project_vault, 'create', [
+    new Address(caller).toScVal(),
+    new Address(token).toScVal(),
+    nativeToScVal(xlmToStroops(totalXlm), { type: 'i128' }),
+    participantsScVal,
+  ])
+  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
+  return ret ? Number(scValToNative(ret)) : 0
+}
+
+export async function fundVault(caller: string, vaultId: number, amountXlm: number) {
+  return invoke(caller, CONTRACT_ADDRESSES.project_vault, 'fund', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(xlmToStroops(amountXlm), { type: 'i128' }),
+  ])
+}
+
+export async function addVaultMilestone(
+  caller: string,
+  vaultId: number,
+  description: string,
+  amountXlm: number
+): Promise<number> {
+  const result = await invoke(caller, CONTRACT_ADDRESSES.project_vault, 'add_milestone', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(description, { type: 'string' }),
+    nativeToScVal(xlmToStroops(amountXlm), { type: 'i128' }),
+  ])
+  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
+  return ret ? Number(scValToNative(ret)) : 0
+}
+
+export async function submitVaultMilestone(
+  caller: string,
+  vaultId: number,
+  milestoneIdx: number,
+  proofUrl: string
+) {
+  return invoke(caller, CONTRACT_ADDRESSES.project_vault, 'submit_milestone', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(milestoneIdx, { type: 'u32' }),
+    nativeToScVal(proofUrl, { type: 'string' }),
+  ])
+}
+
+export async function approveVaultMilestone(
+  caller: string,
+  vaultId: number,
+  milestoneIdx: number
+) {
+  return invoke(caller, CONTRACT_ADDRESSES.project_vault, 'approve_milestone', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(milestoneIdx, { type: 'u32' }),
+  ])
+}
+
+export async function claimVaultTimeout(caller: string, vaultId: number, milestoneIdx: number) {
+  return invoke(caller, CONTRACT_ADDRESSES.project_vault, 'claim_timeout', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(milestoneIdx, { type: 'u32' }),
+  ])
+}
+
+export async function disputeVaultMilestone(
+  caller: string,
+  vaultId: number,
+  milestoneIdx: number
+) {
+  return invoke(caller, CONTRACT_ADDRESSES.project_vault, 'dispute_milestone', [
+    new Address(caller).toScVal(),
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(milestoneIdx, { type: 'u32' }),
+  ])
+}
+
+export async function getVault(caller: string, vaultId: number) {
+  return read(caller, CONTRACT_ADDRESSES.project_vault, 'get_vault', [
+    nativeToScVal(vaultId, { type: 'u32' }),
+  ])
+}
+
+export async function getVaultMilestone(caller: string, vaultId: number, milestoneIdx: number) {
+  return read(caller, CONTRACT_ADDRESSES.project_vault, 'get_milestone', [
+    nativeToScVal(vaultId, { type: 'u32' }),
+    nativeToScVal(milestoneIdx, { type: 'u32' }),
+  ])
+}
+
 // ── Reputation contract ───────────────────────────────────────
 
 export async function getReputation(caller: string, wallet: string) {

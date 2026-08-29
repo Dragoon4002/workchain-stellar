@@ -1747,6 +1747,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "workchain-project-vault"
+version = "0.1.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "workchain-reputation"
 version = "0.1.0"
 dependencies = [
