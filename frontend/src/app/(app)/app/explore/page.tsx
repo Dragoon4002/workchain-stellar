@@ -29,11 +29,16 @@ export default function ExplorePage() {
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set())
   const [minBudget, setMinBudget] = useState('')
   const [maxBudget, setMaxBudget] = useState('')
+  const [budgetError, setBudgetError] = useState('')
   const [loading] = useState(false)
   const [chainJobs, setChainJobs] = useState<Job[]>([])
+  const [chainLoading, setChainLoading] = useState(false)
+  const [chainError, setChainError] = useState('')
 
   async function loadFromChain() {
-    if (!address) return
+    if (!address || chainLoading) return
+    setChainLoading(true)
+    setChainError('')
     try {
       const { getJob } = await import('@/lib/contracts')
       const raw = await getJob(address, 1) as {
@@ -54,8 +59,17 @@ export default function ExplorePage() {
         milestones: [],
         startingPrice: Number(raw.budget) / 10_000_000,
       }
-      setChainJobs([chainJob])
-    } catch {} // ponytail: swallow silently; chain may not have job #1
+      setChainJobs(prev => {
+        const existingIds = new Set(prev.map(j => j.id))
+        const fresh = [chainJob].filter(j => !existingIds.has(j.id))
+        return [...prev, ...fresh]
+      })
+    } catch (err) {
+      console.error(err)
+      setChainError('Failed to load on-chain jobs. Try again.')
+    } finally {
+      setChainLoading(false)
+    }
   }
 
   function toggleTag(tag: string) {
@@ -70,6 +84,7 @@ export default function ExplorePage() {
     setActiveTags(new Set())
     setMinBudget('')
     setMaxBudget('')
+    setBudgetError('')
     setCategory('All')
     setSort('newest')
     setSearch('')
@@ -77,26 +92,30 @@ export default function ExplorePage() {
 
   const hasActiveFilters = activeTags.size > 0 || minBudget || maxBudget
 
-  const filtered = useMemo(() => {
+  function applyFilters(j: Job): boolean {
+    const q = search.trim().toLowerCase()
     const min = minBudget ? Number(minBudget) : 0
     const max = maxBudget ? Number(maxBudget) : Infinity
+    const matchSearch = j.title.toLowerCase().includes(q) || j.description.toLowerCase().includes(q)
+    const matchCat = !category || category === 'All' || j.category === category
+    const matchTags = activeTags.size === 0 || j.tags.some((t) => activeTags.has(t))
+    const matchBudget = j.budget >= min && j.budget <= max
+    return matchSearch && matchCat && matchTags && matchBudget
+  }
 
+  const filtered = useMemo(() => {
     return MOCK_JOBS
-      .filter((j) => {
-        const matchSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
-          j.description.toLowerCase().includes(search.toLowerCase())
-        const matchCat = !category || category === 'All' || j.category === category
-        const matchTags = activeTags.size === 0 || j.tags.some((t) => activeTags.has(t))
-        const matchBudget = j.budget >= min && j.budget <= max
-        return matchSearch && matchCat && matchTags && matchBudget
-      })
+      .filter(applyFilters)
       .sort((a, b) =>
         sort === 'budget_high' ? b.budget - a.budget
         : sort === 'budget_low' ? a.budget - b.budget
         : sort === 'most_bids' ? (BID_COUNTS[b.id] ?? 0) - (BID_COUNTS[a.id] ?? 0)
         : 0 // 'newest' — preserve insertion order (mock data is already newest-first)
       )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, sort, activeTags, minBudget, maxBudget])
+
+  const filteredChain = useMemo(() => chainJobs.filter(applyFilters), [chainJobs, search, category, sort, activeTags, minBudget, maxBudget]) // ponytail: applyFilters deps tracked via outer memo inputs
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -139,9 +158,17 @@ export default function ExplorePage() {
           </SelectContent>
         </Select>
         {address && (
-          <Button onClick={loadFromChain} variant="outline" className="border-white/20 text-[#dddddd] hover:bg-white/8 whitespace-nowrap">
-            Load on-chain jobs
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button
+              onClick={loadFromChain}
+              disabled={chainLoading}
+              variant="outline"
+              className="border-white/20 text-[#dddddd] hover:bg-white/8 whitespace-nowrap"
+            >
+              {chainLoading ? 'Loading...' : 'Load on-chain jobs'}
+            </Button>
+            {chainError && <p className="text-red-400 text-xs font-mono">{chainError}</p>}
+          </div>
         )}
       </div>
 
@@ -169,33 +196,52 @@ export default function ExplorePage() {
         </div>
 
         {/* Budget range + clear */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 shrink-0">Budget</span>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              placeholder="Min XLM"
-              value={minBudget}
-              onChange={(e) => setMinBudget(e.target.value)}
-              className="w-28 h-7 text-xs bg-white/5 border-white/8 text-white placeholder:text-white/20 font-mono"
-            />
-            <span className="text-white/20 text-xs">–</span>
-            <Input
-              type="number"
-              placeholder="Max XLM"
-              value={maxBudget}
-              onChange={(e) => setMaxBudget(e.target.value)}
-              className="w-28 h-7 text-xs bg-white/5 border-white/8 text-white placeholder:text-white/20 font-mono"
-            />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 shrink-0">Budget</span>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Min XLM"
+                value={minBudget}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setMinBudget(val)
+                  if (val && maxBudget && Number(val) > Number(maxBudget)) {
+                    setBudgetError('Min must be ≤ max')
+                  } else {
+                    setBudgetError('')
+                  }
+                }}
+                className="w-28 h-7 text-xs bg-white/5 border-white/8 text-white placeholder:text-white/20 font-mono"
+              />
+              <span className="text-white/20 text-xs">–</span>
+              <Input
+                type="number"
+                placeholder="Max XLM"
+                value={maxBudget}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setMaxBudget(val)
+                  if (minBudget && val && Number(minBudget) > Number(val)) {
+                    setBudgetError('Min must be ≤ max')
+                  } else {
+                    setBudgetError('')
+                  }
+                }}
+                className="w-28 h-7 text-xs bg-white/5 border-white/8 text-white placeholder:text-white/20 font-mono"
+              />
+            </div>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors font-mono"
+              >
+                <X className="w-3 h-3" /> Clear filters
+              </button>
+            )}
           </div>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="ml-auto flex items-center gap-1 text-xs text-white/30 hover:text-white/60 transition-colors font-mono"
-            >
-              <X className="w-3 h-3" /> Clear filters
-            </button>
-          )}
+          {budgetError && <p className="text-red-400 text-xs mt-1 font-mono">{budgetError}</p>}
         </div>
       </div>
 
@@ -205,12 +251,12 @@ export default function ExplorePage() {
             <Skeleton key={i} className="h-52 bg-white/5 rounded-xl" />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered.length === 0 && filteredChain.length === 0 ? (
         <div className="text-center py-20 text-white/30">No jobs match your search.</div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <AnimatePresence mode="popLayout">
-            {[...chainJobs, ...filtered].map((job) => (
+            {[...filteredChain, ...filtered].map((job) => (
               <motion.div
                 key={job.id}
                 layout

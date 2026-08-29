@@ -50,6 +50,8 @@ export default function NewJobPage() {
   const [tagInput, setTagInput] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const addMilestone = () => setMilestones([...milestones, { description: '', amount: '' }])
   const removeMilestone = (i: number) => {
@@ -76,24 +78,33 @@ export default function NewJobPage() {
     if (!description.trim()) e.description = 'Description is required'
     if (!startingPrice || isNaN(Number(startingPrice)) || Number(startingPrice) <= 0)
       e.startingPrice = 'Valid starting price required'
-    if (!deadline) e.deadline = 'Deadline is required'
+    if (!deadline) {
+      e.deadline = 'Deadline is required'
+    } else if (new Date(deadline).getTime() / 1000 <= Date.now() / 1000) {
+      e.deadline = 'Deadline must be a future date'
+    }
     const badMilestone = milestones.some((m) => !m.description.trim() || !m.amount || Number(m.amount) <= 0)
     if (badMilestone) e.milestones = 'All milestones need a description and valid amount'
     return e
   }
 
   async function handleSubmit() {
+    setFormError('')
     const e = validate()
     setErrors(e)
     setSubmitted(true)
-    if (Object.keys(e).length > 0 || !address) return
+    if (Object.keys(e).length > 0) return
+    if (!address) { setFormError('Connect your wallet to continue'); return }
+    setSubmitting(true)
     try {
       const deadlineUnix = Math.floor(new Date(deadline).getTime() / 1000)
       const jobId = await postJob(address, title, description, Number(startingPrice), deadlineUnix)
       addJobId(address, jobId)
       router.push(`/app/jobs/${jobId}`)
     } catch (err) {
-      setErrors({ title: String(err) })
+      setFormError(String(err))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -113,6 +124,7 @@ export default function NewJobPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Build a DeFi Dashboard"
+              maxLength={150}
               className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
             />
             {submitted && errors.title && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
@@ -148,6 +160,7 @@ export default function NewJobPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the project in detail — scope, requirements, deliverables..."
               rows={6}
+              maxLength={2000}
               className="bg-white/5 border-white/8 text-white placeholder:text-white/30 resize-none"
             />
             {submitted && errors.description && <p className="text-xs text-red-400 mt-1">{errors.description}</p>}
@@ -175,6 +188,7 @@ export default function NewJobPage() {
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
                 className="bg-white/5 border-white/8 text-white"
               />
               {submitted && errors.deadline && <p className="text-xs text-red-400 mt-1">{errors.deadline}</p>}
@@ -262,8 +276,10 @@ export default function NewJobPage() {
             )}
           </div>
 
+          {formError && <p className="text-red-400 text-sm">{formError}</p>}
           <Button
             onClick={handleSubmit}
+            disabled={submitting}
             variant="tile" className="w-full font-semibold h-11 text-base"
           >
             Post Job

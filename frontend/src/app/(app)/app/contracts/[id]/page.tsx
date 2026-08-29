@@ -17,12 +17,15 @@ import { ArrowRight, Lock } from 'lucide-react'
 export default function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { address } = useWalletStore()
-  const me = address ?? 'GYOUR_ADDRESS_HERE'
+  const me = address ?? ''
   const contract = MOCK_CONTRACTS.find((c) => c.id === id)
 
   const [reviewOpen, setReviewOpen] = useState(false)
   const [revisionOpen, setRevisionOpen] = useState(false)
   const [revisionFeedback, setRevisionFeedback] = useState('')
+  const [acting, setActing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [needsRetryRelease, setNeedsRetryRelease] = useState(false)
 
   if (!contract) notFound()
   // ponytail: notFound() returns never but TS doesn't narrow through it — non-null assert is correct here
@@ -48,10 +51,11 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   async function handleSubmitWork() {
     if (!address) return
     const proofUrl = prompt('Enter proof URL (GitHub link, Figma, etc):')
-    if (!proofUrl) return
+    const trimmedUrl = proofUrl?.trim() ?? ''
+    if (!trimmedUrl) return
     try {
       const { submitMilestone } = await import('@/lib/contracts')
-      await submitMilestone(address, actionMilestoneId, proofUrl)
+      await submitMilestone(address, actionMilestoneId, trimmedUrl)
       alert('Work submitted!')
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Transaction failed')
@@ -60,10 +64,17 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
   async function handleApprove() {
     if (!address) return
+    setError(null)
     try {
       const { approveMilestone, releaseEscrow } = await import('@/lib/contracts')
       await approveMilestone(address, actionMilestoneId)
-      await releaseEscrow(address, actionMilestoneId)
+      try {
+        await releaseEscrow(address, actionMilestoneId)
+      } catch {
+        setError('Milestone approved but escrow release failed. Click "Retry Release" to try again.')
+        setNeedsRetryRelease(true)
+        return
+      }
       const isLast = actionMilestoneId === c.milestones.length - 1
       if (isLast) {
         setReviewOpen(true)
@@ -71,7 +82,28 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         alert('Milestone approved and escrow released!')
       }
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Transaction failed')
+      setError(String(e))
+    }
+  }
+
+  async function handleRetryRelease() {
+    if (!address) return
+    setActing(true)
+    setError(null)
+    try {
+      const { releaseEscrow } = await import('@/lib/contracts')
+      await releaseEscrow(address, actionMilestoneId)
+      setNeedsRetryRelease(false)
+      const isLast = actionMilestoneId === c.milestones.length - 1
+      if (isLast) {
+        setReviewOpen(true)
+      } else {
+        alert('Escrow released!')
+      }
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setActing(false)
     }
   }
 
@@ -90,12 +122,16 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
   async function handleDispute() {
     if (!address) return
+    if (!window.confirm('Are you sure? Disputes are irreversible.')) return
+    setActing(true)
     try {
       const { disputeMilestone } = await import('@/lib/contracts')
       await disputeMilestone(address, actionMilestoneId)
       alert('Dispute raised!')
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Transaction failed')
+    } finally {
+      setActing(false)
     }
   }
 
@@ -183,6 +219,22 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                 <CardTitle className="text-white text-base">Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {error && (
+                  <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</p>
+                )}
+
+                {needsRetryRelease && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRetryRelease}
+                    disabled={acting}
+                    className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+                  >
+                    Retry Release
+                  </Button>
+                )}
+
                 {/* Freelancer: submit when milestone is active (not revision — that's in the feedback card) */}
                 {isFreelancer && activeMilestone?.status === 'active' && (
                   <Button size="sm" variant="tile" onClick={handleSubmitWork} className="w-full font-semibold">
@@ -246,6 +298,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       size="sm"
                       variant="outline"
                       onClick={handleDispute}
+                      disabled={acting}
                       className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
                     >
                       Dispute
@@ -262,7 +315,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
     {isClient && (
       <ReviewModal
         open={reviewOpen}
-        onClose={() => setReviewOpen(false)}
+        onClose={() => { setReviewOpen(false) }}
         reviewer={me}
         freelancer={c.freelancerAddress}
         job_id={c.id}

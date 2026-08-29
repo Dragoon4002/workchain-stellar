@@ -22,6 +22,13 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
 
+  function handleClose() {
+    setStars(0)
+    setText('')
+    setDone(false)
+    onClose()
+  }
+
   async function handleSubmit() {
     if (!stars || !text.trim()) return
     setSubmitting(true)
@@ -34,7 +41,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
     }).catch(() => {})
     setSubmitting(false)
     setDone(true)
-    setTimeout(() => { setDone(false); onClose() }, 1200)
+    setTimeout(() => { handleClose() }, 1200)
   }
 
   const display = hovered || stars
@@ -48,7 +55,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleClose() }}
         >
           <motion.div
             key="card"
@@ -63,7 +70,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
                 <h2 className="text-white font-semibold text-lg">Leave a Review</h2>
                 <p className="text-white/40 text-xs mt-0.5">{job_title}</p>
               </div>
-              <button onClick={onClose} className="text-white/30 hover:text-white/60 transition-colors">
+              <button onClick={handleClose} className="text-white/30 hover:text-white/60 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -105,7 +112,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
                 />
 
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" className="text-white/40" onClick={onClose}>
+                  <Button variant="ghost" className="text-white/40" onClick={handleClose}>
                     Skip
                   </Button>
                   <Button

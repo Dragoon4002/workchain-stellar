@@ -25,9 +25,13 @@ interface ParticipantInput {
 function addVaultIdToIndex(wallet: string, id: number) {
   if (typeof window === 'undefined') return
   const key = `workchain:vaults:${wallet}`
-  const existing: number[] = JSON.parse(localStorage.getItem(key) ?? '[]')
-  if (!existing.includes(id)) {
-    localStorage.setItem(key, JSON.stringify([...existing, id]))
+  try {
+    const existing: number[] = JSON.parse(localStorage.getItem(key) ?? '[]')
+    if (!existing.includes(id)) {
+      localStorage.setItem(key, JSON.stringify([...existing, id]))
+    }
+  } catch {
+    localStorage.setItem(key, JSON.stringify([id]))
   }
 }
 
@@ -73,10 +77,13 @@ export default function NewProjectPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!address) return
+    if (!address) {
+      setError('Connect your wallet to continue')
+      return
+    }
     setError(null)
 
-    if (Math.abs(bpsSum - 100) > 0.01) {
+    if (Math.abs(bpsSum - 100) > 0.001) {
       setError(`Participant splits must sum to 100% (currently ${bpsSum.toFixed(1)}%)`)
       return
     }
@@ -85,6 +92,34 @@ export default function NewProjectPage() {
     if (!total || total <= 0) {
       setError('Enter a valid total budget')
       return
+    }
+
+    for (const p of participants) {
+      const pct = parseFloat(p.pct)
+      if (pct < 0) {
+        setError('Participant percentage cannot be negative')
+        return
+      }
+    }
+
+    const wallets = participants.map((p) => p.wallet.trim())
+    if (new Set(wallets).size !== wallets.length) {
+      setError('Duplicate wallet addresses are not allowed')
+      return
+    }
+
+    for (let i = 0; i < milestones.length; i++) {
+      const m = milestones[i]
+      const hasDesc = !!m.description
+      const hasAmount = Number(m.amount) > 0
+      if (hasDesc && !hasAmount) {
+        setError(`Milestone #${i + 1} has a description but no amount`)
+        return
+      }
+      if (!hasDesc && hasAmount) {
+        setError(`Milestone #${i + 1} has an amount but no description`)
+        return
+      }
     }
 
     const vaultParticipants: VaultParticipant[] = participants.map((p) => ({
@@ -102,18 +137,18 @@ export default function NewProjectPage() {
       // 1. create vault
       const vaultId = await createVault(address, XLM_TOKEN, total, vaultParticipants)
 
-      // 2. fund vault
+      // 2. index immediately so a fundVault failure doesn't orphan the vault
+      addVaultIdToIndex(address, vaultId)
+
+      // 3. fund vault
       await fundVault(address, vaultId, total)
 
-      // 3. add milestones
+      // 4. add milestones
       for (const m of milestones) {
-        if (m.description && m.amount) {
+        if (m.description && Number(m.amount) > 0) {
           await addVaultMilestone(address, vaultId, m.description, parseFloat(m.amount))
         }
       }
-
-      // 4. store vault_id locally for listing
-      addVaultIdToIndex(address, vaultId)
 
       router.push(`/app/projects/${vaultId}`)
     } catch (err) {
@@ -167,7 +202,7 @@ export default function NewProjectPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-white font-semibold text-sm uppercase tracking-wide">
               Participants
-              <span className={`ml-2 text-xs font-mono ${Math.abs(bpsSum - 100) > 0.01 ? 'text-red-400' : 'text-emerald-400'}`}>
+              <span className={`ml-2 text-xs font-mono ${Math.abs(bpsSum - 100) > 0.001 ? 'text-red-400' : 'text-emerald-400'}`}>
                 {bpsSum.toFixed(1)}% / 100%
               </span>
             </h2>

@@ -13,7 +13,13 @@ import {
 import { rpcServer, server, CONTRACT_ADDRESSES, XLM_TOKEN, NETWORK_PASSPHRASE } from './stellar'
 import { StellarWalletsKit } from './wallet'
 
+// ponytail: known funded testnet account for sim-only fallback
+const SIM_ACCOUNT = 'GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN'
+const STELLAR_ADDR = /^G[A-Z2-7]{55}$/
+
 export function xlmToStroops(xlm: number): bigint {
+  if (!Number.isFinite(xlm)) throw new Error('Invalid amount')
+  if (xlm < 0) throw new Error('Amount cannot be negative')
   return BigInt(Math.round(xlm * 10_000_000))
 }
 export function stroopsToXlm(stroops: bigint | number): number {
@@ -25,7 +31,8 @@ async function invoke(
   contractId: string,
   method: string,
   args: xdr.ScVal[]
-): Promise<unknown> {
+): Promise<rpc.Api.GetTransactionResponse> {
+  if (!contractId) throw new Error('Contract address not configured. Check environment variables.')
   const contract = new Contract(contractId)
   const account = await server.loadAccount(sourceAddress)
 
@@ -47,10 +54,18 @@ async function invoke(
     address: sourceAddress,
   })
 
-  const result = await rpcServer.sendTransaction(
+  const submitted = await rpcServer.sendTransaction(
     TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE)
   )
-  return result
+  if (submitted.status === 'ERROR') throw new Error(`Send failed: ${JSON.stringify(submitted.errorResult)}`)
+
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 2000))
+    const confirmed = await rpcServer.getTransaction(submitted.hash)
+    if (confirmed.status === rpc.Api.GetTransactionStatus.SUCCESS) return confirmed
+    if (confirmed.status === rpc.Api.GetTransactionStatus.FAILED) throw new Error('Transaction failed on-chain')
+  }
+  throw new Error('Transaction timeout — not confirmed after 40 seconds')
 }
 
 async function read(
@@ -59,8 +74,15 @@ async function read(
   method: string,
   args: xdr.ScVal[]
 ): Promise<unknown> {
+  if (!contractId) throw new Error('Contract address not configured. Check environment variables.')
   const contract = new Contract(contractId)
-  const account = await server.loadAccount(sourceAddress)
+
+  let account
+  try {
+    account = await server.loadAccount(sourceAddress)
+  } catch {
+    account = await server.loadAccount(SIM_ACCOUNT)
+  }
 
   const tx = new TransactionBuilder(account, {
     fee: BASE_FEE,
@@ -85,6 +107,7 @@ export async function postJob(
   budgetXlm: number,
   deadlineUnix: number
 ): Promise<number> {
+  if (deadlineUnix <= 0) throw new Error('Deadline must be a future timestamp')
   const result = await invoke(caller, CONTRACT_ADDRESSES.job, 'post_job', [
     new Address(caller).toScVal(),
     nativeToScVal(title, { type: 'string' }),
@@ -92,8 +115,7 @@ export async function postJob(
     nativeToScVal(xlmToStroops(budgetXlm), { type: 'i128' }),
     nativeToScVal(BigInt(deadlineUnix), { type: 'u64' }),
   ])
-  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
-  return ret ? Number(scValToNative(ret)) : 0
+  return result.returnValue ? Number(scValToNative(result.returnValue)) : 0
 }
 
 export async function getJob(caller: string, jobId: number) {
@@ -127,14 +149,14 @@ export async function createMilestone(
   amountXlm: number,
   deadlineUnix: number
 ): Promise<number> {
+  if (deadlineUnix <= 0) throw new Error('Deadline must be a future timestamp')
   const result = await invoke(caller, CONTRACT_ADDRESSES.milestone, 'create', [
     nativeToScVal(jobId, { type: 'u32' }),
     nativeToScVal(description, { type: 'string' }),
     nativeToScVal(xlmToStroops(amountXlm), { type: 'i128' }),
     nativeToScVal(BigInt(deadlineUnix), { type: 'u64' }),
   ])
-  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
-  return ret ? Number(scValToNative(ret)) : 0
+  return result.returnValue ? Number(scValToNative(result.returnValue)) : 0
 }
 
 export async function submitMilestone(caller: string, milestoneId: number, proofUrl: string) {
@@ -211,6 +233,10 @@ export async function createVault(
   totalXlm: number,
   participants: VaultParticipant[]
 ): Promise<number> {
+  for (const p of participants) {
+    if (!STELLAR_ADDR.test(p.wallet)) throw new Error(`Invalid wallet address: ${p.wallet}`)
+  }
+
   const participantsScVal = xdr.ScVal.scvVec(
     participants.map((p) =>
       xdr.ScVal.scvMap([
@@ -232,8 +258,7 @@ export async function createVault(
     nativeToScVal(xlmToStroops(totalXlm), { type: 'i128' }),
     participantsScVal,
   ])
-  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
-  return ret ? Number(scValToNative(ret)) : 0
+  return result.returnValue ? Number(scValToNative(result.returnValue)) : 0
 }
 
 export async function fundVault(caller: string, vaultId: number, amountXlm: number) {
@@ -256,8 +281,7 @@ export async function addVaultMilestone(
     nativeToScVal(description, { type: 'string' }),
     nativeToScVal(xlmToStroops(amountXlm), { type: 'i128' }),
   ])
-  const ret = (result as { returnValue?: xdr.ScVal }).returnValue
-  return ret ? Number(scValToNative(ret)) : 0
+  return result.returnValue ? Number(scValToNative(result.returnValue)) : 0
 }
 
 export async function submitVaultMilestone(

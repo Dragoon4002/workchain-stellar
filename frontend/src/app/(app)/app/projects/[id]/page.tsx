@@ -22,8 +22,8 @@ const MILESTONE_STATE: Record<number, { label: string; color: string }> = {
   0: { label: 'Pending', color: 'text-white/40' },
   1: { label: 'Submitted', color: 'text-amber-400' },
   2: { label: 'Approved', color: 'text-emerald-400' },
-  3: { label: 'Disputed', color: 'text-red-400' },
-  4: { label: 'Released (timeout)', color: 'text-violet-400' },
+  3: { label: 'Revision Requested', color: 'text-yellow-400' },
+  4: { label: 'Disputed', color: 'text-red-400' },
 }
 
 const VAULT_STATE: Record<number, string> = {
@@ -53,7 +53,7 @@ function MilestoneCard({ vaultId, idx, data, isOwner, isParticipant, onAction, n
   const state: number = data?.state ?? 0
   const submittedAt: number = Number(data?.submitted_at ?? 0)
   const timeoutAt = submittedAt + TIMEOUT_SECS
-  const timedOut = state === 1 && nowSecs > timeoutAt
+  const timedOut = state === 1 && submittedAt > 0 && nowSecs > timeoutAt
   const secsLeft = timeoutAt - nowSecs
   const hoursLeft = Math.max(0, Math.floor(secsLeft / 3600))
 
@@ -134,8 +134,9 @@ function MilestoneCard({ vaultId, idx, data, isOwner, isParticipant, onAction, n
           </div>
         )}
 
-        {/* Approve — owner, state submitted */}
-        {isOwner && state === 1 && (
+        {/* Approve — owner, state submitted, not self-submitted
+            ponytail: full self-approval guard needs submitted_by field from contract */}
+        {isOwner && state === 1 && !isParticipant && (
           <Button
             size="sm"
             disabled={acting}
@@ -191,7 +192,7 @@ export default function ProjectDetailPage() {
   const [nowSecs, setNowSecs] = useState(Math.floor(Date.now() / 1000))
 
   const load = useCallback(async () => {
-    if (!address || isNaN(vaultId)) return
+    if (!address || isNaN(vaultId)) { setLoading(false); return }
     setLoading(true)
     try {
       const vaultData = await getVault(address, vaultId)
@@ -211,9 +212,9 @@ export default function ProjectDetailPage() {
 
   useEffect(() => { load() }, [load])
 
-  // tick clock every 60s for timeout display
+  // tick clock every 1s for timeout countdown display
   useEffect(() => {
-    const t = setInterval(() => setNowSecs(Math.floor(Date.now() / 1000)), 60_000)
+    const t = setInterval(() => setNowSecs(Math.floor(Date.now() / 1000)), 1_000)
     return () => clearInterval(t)
   }, [])
 
