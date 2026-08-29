@@ -109,13 +109,13 @@ Handles fund locking, release, cancellation for the job marketplace flow.
 
 ### Contract Addresses (Testnet)
 
-| Contract | Address |
-|---|---|
-| Escrow | `CBXBUXK2UI55M3STP2L2ZHBP6NEWKSDRKK3RAERQTH2XMQBYMIZAVPOJ` |
-| Job | set in Vercel env vars |
-| Milestone | set in Vercel env vars |
-| Reputation | set in Vercel env vars |
-| Project Vault | `CCK7S2FKE257IY4LIUACPAL5JFKUHYO6GWVZ7B6WGM6VVOSK6JZIKZ5N` |
+| Contract | Address | Explorer |
+|---|---|---|
+| Escrow | `CBXBUXK2UI55M3STP2L2ZHBP6NEWKSDRKK3RAERQTH2XMQBYMIZAVPOJ` | [View](https://stellar.expert/explorer/testnet/contract/CBXBUXK2UI55M3STP2L2ZHBP6NEWKSDRKK3RAERQTH2XMQBYMIZAVPOJ) |
+| Job | `CD3Y7OPUF3BHCBKGNFOX3ISJGY6OHDJFZEDC2DN7JNOWKJXJQ4PHVKBA` | [View](https://stellar.expert/explorer/testnet/contract/CD3Y7OPUF3BHCBKGNFOX3ISJGY6OHDJFZEDC2DN7JNOWKJXJQ4PHVKBA) |
+| Milestone | `CA7CD7ZP3YOBTHLLPPBB5Z62Y7GHNKESNKNPXR2UDH7I7SHNW3RURIDK` | [View](https://stellar.expert/explorer/testnet/contract/CA7CD7ZP3YOBTHLLPPBB5Z62Y7GHNKESNKNPXR2UDH7I7SHNW3RURIDK) |
+| Reputation | `CAKKTZKK6OY5Q7BPOJ5AJY67G24X3XV2GI6FOMLHAQ4KGUWXGQBCSXEM` | [View](https://stellar.expert/explorer/testnet/contract/CAKKTZKK6OY5Q7BPOJ5AJY67G24X3XV2GI6FOMLHAQ4KGUWXGQBCSXEM) |
+| Project Vault | `CCK7S2FKE257IY4LIUACPAL5JFKUHYO6GWVZ7B6WGM6VVOSK6JZIKZ5N` | [View](https://stellar.expert/explorer/testnet/contract/CCK7S2FKE257IY4LIUACPAL5JFKUHYO6GWVZ7B6WGM6VVOSK6JZIKZ5N) |
 
 ---
 
@@ -149,9 +149,9 @@ npm run dev
 NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
 NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 NEXT_PUBLIC_CONTRACT_ESCROW=CBXBUXK2UI55M3STP2L2ZHBP6NEWKSDRKK3RAERQTH2XMQBYMIZAVPOJ
-NEXT_PUBLIC_CONTRACT_JOB=<deployed_contract_address>
-NEXT_PUBLIC_CONTRACT_MILESTONE=<deployed_contract_address>
-NEXT_PUBLIC_CONTRACT_REPUTATION=<deployed_contract_address>
+NEXT_PUBLIC_CONTRACT_JOB=CD3Y7OPUF3BHCBKGNFOX3ISJGY6OHDJFZEDC2DN7JNOWKJXJQ4PHVKBA
+NEXT_PUBLIC_CONTRACT_MILESTONE=CA7CD7ZP3YOBTHLLPPBB5Z62Y7GHNKESNKNPXR2UDH7I7SHNW3RURIDK
+NEXT_PUBLIC_CONTRACT_REPUTATION=CAKKTZKK6OY5Q7BPOJ5AJY67G24X3XV2GI6FOMLHAQ4KGUWXGQBCSXEM
 NEXT_PUBLIC_CONTRACT_PROJECT_VAULT=CCK7S2FKE257IY4LIUACPAL5JFKUHYO6GWVZ7B6WGM6VVOSK6JZIKZ5N
 NEXT_PUBLIC_XLM_TOKEN=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
 ```
@@ -190,9 +190,7 @@ We onboarded **50 testnet users** across 25 client/freelancer pairs. Each pair c
 
 **User feedback form:** [Google Form — link TBD]
 
-**User list with wallet addresses:** [tasks/workchain-users.csv](tasks/workchain-users.csv)
-
-The CSV includes: name, email, wallet address, role (client/freelancer), transaction count.
+**Onboarding responses (wallet addresses, feedback, ratings):** [Google Sheets — link TBD]
 
 ### How to get testnet XLM
 
