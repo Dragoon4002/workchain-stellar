@@ -53,6 +53,7 @@ export interface Milestone {
 
 export interface Contract {
   id: string
+  jobId?: string
   jobTitle: string
   clientAddress: string
   freelancerAddress: string
@@ -215,6 +216,7 @@ export const MOCK_JOBS: Job[] = [
 export const MOCK_CONTRACTS: Contract[] = [
   {
     id: 'c1',
+    jobId: '6',
     jobTitle: 'Mobile App for Stellar Payments',
     clientAddress: 'GZABC1111DEFGH',
     freelancerAddress: 'GYOUR_ADDRESS_HERE',
@@ -230,6 +232,7 @@ export const MOCK_CONTRACTS: Contract[] = [
   },
   {
     id: 'c2',
+    jobId: '1',
     jobTitle: 'DeFi Dashboard with React',
     clientAddress: 'GBXYZ1234ABCDEF',
     freelancerAddress: 'GFREELANCER5678',

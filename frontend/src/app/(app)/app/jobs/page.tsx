@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useWalletStore } from '@/store/wallet'
 import { getJob, stroopsToXlm } from '@/lib/contracts'
+import { MOCK_JOBS } from '@/lib/mock-data'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { PlusSquare, Briefcase, ChevronRight } from 'lucide-react'
@@ -22,6 +23,7 @@ function statusColor(status: string) {
 }
 
 function ProgressBar({ milestones }: { milestones: { status: string }[] }) {
+  if (!milestones.length) return null
   const approved = milestones.filter((m) => m.status === 'approved').length
   const pct = Math.round((approved / milestones.length) * 100)
   return (
@@ -158,7 +160,7 @@ function ClientView({ me }: { me: string }) {
                     Budget: {job.budget.toLocaleString()} XLM
                   </span>
                   <span className="text-white/30 text-xs">
-                    Due {new Date(job.deadline).toLocaleDateString()}
+                    Due {job.deadline ? new Date(job.deadline).toLocaleDateString() : '—'}
                   </span>
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold">
                     {bids.length} bid{bids.length !== 1 ? 's' : ''}
@@ -179,13 +181,23 @@ function ClientView({ me }: { me: string }) {
 
 // ── FREELANCER VIEW ───────────────────────────────────────────────────────────
 
-function FreelancerView({ me: _ }: { me: string }) {
+function FreelancerView({ me }: { me: string }) {
   const [filter, setFilter] = useState<FreelancerFilter>('all')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [bidJobs, setBidJobs] = useState<any[]>([])
 
-  const myBids: never[] = []
-  const appliedJobs: never[] = []
-  const activeContracts: never[] = []
-  const completedContracts: never[] = []
+  useEffect(() => {
+    if (typeof window === 'undefined' || !me) return
+    try {
+      const ids: string[] = JSON.parse(localStorage.getItem(`workchain:bids:${me}`) ?? '[]')
+      setBidJobs(ids.map((id) => ({ id })))
+    } catch { /* ignore */ }
+  }, [me])
+
+  const appliedJobs = bidJobs.map(({ id }: { id: string }) => {
+    const mock = MOCK_JOBS.find((j) => j.id === id)
+    return { jobId: id, title: mock?.title ?? `Job #${id}`, price: mock?.budget ?? 0 }
+  })
 
   const FREELANCER_TABS: { key: FreelancerFilter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -207,34 +219,11 @@ function FreelancerView({ me: _ }: { me: string }) {
     | { kind: 'contract'; contractId: string; title: string; amount: number; status: 'active' | 'completed' }
 
   function buildRows(): Row[] {
-    // ponytail: no indexer — applied/active/completed pulled from localStorage when available
-    if (filter === 'all') {
-      const bidRows: Row[] = appliedJobs.map((j) => ({
-        kind: 'bid', jobId: String(j), title: String(j), price: 0, status: 'pending' as const,
-      }))
-      const contractRows: Row[] = activeContracts.map((c) => ({
-        kind: 'contract', contractId: String(c), title: String(c), amount: 0, status: 'active' as const,
-      }))
-      return [...bidRows, ...contractRows]
-    }
-    if (filter === 'applied') return []
-    if (filter === 'active') {
-      return activeContracts.map((c) => ({
-        kind: 'contract',
-        contractId: String(c),
-        title: String(c),
-        amount: 0,
-        status: 'active' as const,
-      }))
-    }
-    // completed
-    return completedContracts.map((c) => ({
-      kind: 'contract',
-      contractId: String(c),
-      title: String(c),
-      amount: 0,
-      status: 'completed' as const,
+    const bidRows: Row[] = appliedJobs.map((j) => ({
+      kind: 'bid', jobId: j.jobId, title: j.title, price: j.price, status: 'pending' as const,
     }))
+    if (filter === 'all' || filter === 'applied') return bidRows
+    return []
   }
 
   const rows = buildRows()

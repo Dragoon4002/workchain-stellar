@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { addReview } from '@/lib/reviews'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,10 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
   const [text, setText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
+  const [error, setError] = useState('')
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   function handleClose() {
     setStars(0)
@@ -32,8 +36,15 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
   async function handleSubmit() {
     if (!stars || !text.trim()) return
     setSubmitting(true)
+    setError('')
     // persist client-side immediately; also fire the API route for validation
-    addReview({ reviewer, freelancer, job_id, stars, text: text.trim(), job_title })
+    try {
+      addReview({ reviewer, freelancer, job_id, stars, text: text.trim(), job_title })
+    } catch (e) {
+      setSubmitting(false)
+      setError((e as Error).message)
+      return
+    }
     await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -41,7 +52,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
     }).catch(() => {})
     setSubmitting(false)
     setDone(true)
-    setTimeout(() => { handleClose() }, 1200)
+    timerRef.current = setTimeout(() => { handleClose() }, 1200)
   }
 
   const display = hovered || stars
@@ -111,6 +122,7 @@ export function ReviewModal({ open, onClose, reviewer, freelancer, job_id, job_t
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white/80 text-sm resize-none placeholder:text-white/20 focus:outline-none focus:border-white/30 mb-4"
                 />
 
+                {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" className="text-white/40" onClick={handleClose}>
                     Skip

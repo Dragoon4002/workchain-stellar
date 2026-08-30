@@ -97,7 +97,7 @@ export default function MyProfilePage() {
               />
             </div>
             <p className="text-white font-semibold text-sm mb-1">
-              {address === 'GYOUR_ADDRESS_HERE' ? 'Demo Account' : 'Freelancer'}
+              {freelancer ? 'Freelancer' : 'Client'}
             </p>
             <p className="font-mono text-white/40 text-xs mb-3 break-all px-2">{shortenAddress(address)}</p>
             <ReputationBadge score={rep.score} count={rep.count} />

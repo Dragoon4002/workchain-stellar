@@ -107,6 +107,10 @@ export default function NewProjectPage() {
       setError('Duplicate wallet addresses are not allowed')
       return
     }
+    if (!wallets.includes(address)) {
+      setError('You (the owner) must be included as a participant to receive payment')
+      return
+    }
 
     for (let i = 0; i < milestones.length; i++) {
       const m = milestones[i]

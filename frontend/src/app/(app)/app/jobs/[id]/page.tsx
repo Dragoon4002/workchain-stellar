@@ -103,9 +103,9 @@ function CTASidebar({ job, relationship, myBid, me }: {
   const [reportOpen, setReportOpen] = useState(false)
   const [reportText, setReportText] = useState('')
 
-  const tid = threadId(job.id, me, job.clientAddress)
-
   async function openOrCreateThread() {
+    if (!me) return
+    const tid = threadId(job.id, me, job.clientAddress)
     // Ensure thread exists before navigating; sendMessage upserts it
     await sendMessage({
       thread_id: tid,
@@ -192,11 +192,13 @@ function CTASidebar({ job, relationship, myBid, me }: {
               </div>
             </div>
             <p className="text-xs text-white/30 text-center">Waiting for client to review</p>
+            {/* ponytail: cancelBid not yet wired on-chain; disabled until implemented */}
             <button
-              onClick={() => alert('Bid cancelled.')}
-              className="w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/8 hover:border-red-500/30 text-white/30 hover:text-red-400 font-medium text-sm transition-colors"
+              disabled
+              className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/8 text-white/20 font-medium text-sm cursor-not-allowed"
+              title="Bid cancellation coming soon"
             >
-              Cancel Bid
+              Awaiting review
             </button>
           </div>
         )}
@@ -247,7 +249,15 @@ function CTASidebar({ job, relationship, myBid, me }: {
                   />
                 </div>
                 <Button
-                  onClick={() => console.log({ proposal, price, timeline, jobId: job.id })}
+                  onClick={() => {
+                    if (!me) return
+                    try {
+                      const key = `workchain:bids:${me}`
+                      const ids: string[] = JSON.parse(localStorage.getItem(key) ?? '[]')
+                      if (!ids.includes(job.id)) { ids.push(job.id); localStorage.setItem(key, JSON.stringify(ids)) }
+                    } catch { /* ignore */ }
+                    console.log({ proposal, price, timeline, jobId: job.id })
+                  }}
                   variant="tile" className="w-full font-semibold"
                 >
                   Submit Bid
@@ -278,11 +288,13 @@ function CTASidebar({ job, relationship, myBid, me }: {
             <Button variant="ghost" onClick={() => setReportOpen(false)} className="text-white/40 hover:bg-white/8">
               Cancel
             </Button>
+            {/* ponytail: job-level dispute not yet wired to contract/platform; disabled until implemented */}
             <Button
-              onClick={() => { alert('Dispute filed. Escrow locked.'); setReportOpen(false) }}
-              className="bg-red-500 hover:bg-red-400 text-white font-semibold"
+              disabled
+              title="Dispute submission coming soon"
+              className="bg-red-500/40 text-white/40 font-semibold cursor-not-allowed"
             >
-              File Dispute
+              Coming Soon
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -298,6 +310,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const { address } = useWalletStore()
   const job = MOCK_JOBS.find((j) => j.id === id)
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null)
+  const [hireError, setHireError] = useState('')
 
   if (!job) notFound()
 
@@ -307,7 +320,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const bids = MOCK_BIDS.filter((b) => b.jobId === id)
   const myBid = bids.find((b) => b.freelancerAddress === me)
   const assignedContract = MOCK_CONTRACTS.find(
-    (c) => c.jobTitle === job.title && c.freelancerAddress === me && c.status === 'active'
+    (c) => c.jobId === job.id && c.freelancerAddress === me && c.status === 'active'
   )
 
   const relationship: Relationship =
@@ -459,11 +472,13 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setSelectedBid(null)} className="text-white/40 hover:bg-white/8">
+            {hireError && <p className="text-red-400 text-xs w-full">{hireError}</p>}
+            <Button variant="ghost" onClick={() => { setSelectedBid(null); setHireError('') }} className="text-white/40 hover:bg-white/8">
               Cancel
             </Button>
+            {/* ponytail: hireFreelancer contract call not yet wired; placeholder until implemented */}
             <Button
-              onClick={() => { alert('Match created! Message room opened.'); setSelectedBid(null) }}
+              onClick={() => { setHireError('Hire not yet implemented — contract integration coming soon.') }}
               variant="tile" className="font-semibold"
             >
               Confirm & Hire

@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react'
 import { notFound } from 'next/navigation'
-import { MOCK_CONTRACTS } from '@/lib/mock-data'
+import { MOCK_CONTRACTS, Milestone } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { MilestoneTracker } from '@/components/milestone-tracker'
@@ -14,18 +14,48 @@ import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { ArrowRight, Lock } from 'lucide-react'
 
+// ponytail: stub shape for localStorage-sourced escrows; swap when chain fetch is implemented
+type ContractStub = {
+  id: string; jobTitle: string; clientAddress: string; freelancerAddress: string;
+  totalAmount: number; lockedAmount: number; status: string;
+  milestones: Milestone[]
+}
+
+function getLocalContracts(): ContractStub[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('workchain:escrows:'))
+    const ids = new Set<string>()
+    for (const k of keys) {
+      const arr: number[] = JSON.parse(localStorage.getItem(k) ?? '[]')
+      arr.forEach(id => ids.add(String(id)))
+    }
+    return Array.from(ids).map(id => ({
+      id, jobTitle: `Escrow #${id}`, clientAddress: '', freelancerAddress: '',
+      totalAmount: 0, lockedAmount: 0, status: 'active', milestones: []
+    }))
+  } catch { return [] }
+}
+
 export default function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { address } = useWalletStore()
   const me = address ?? ''
-  const contract = MOCK_CONTRACTS.find((c) => c.id === id)
+
+  // Bug 1 fix: fall through to localStorage-sourced stubs when mock doesn't match
+  const mockContract = MOCK_CONTRACTS.find((c) => c.id === id)
+  const contract: ContractStub | undefined = mockContract ?? getLocalContracts().find(c => c.id === id)
 
   const [reviewOpen, setReviewOpen] = useState(false)
   const [revisionOpen, setRevisionOpen] = useState(false)
   const [revisionFeedback, setRevisionFeedback] = useState('')
+  const [proofOpen, setProofOpen] = useState(false)
+  const [proofUrl, setProofUrl] = useState('')
   const [acting, setActing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [needsRetryRelease, setNeedsRetryRelease] = useState(false)
+  const [disputeConfirmOpen, setDisputeConfirmOpen] = useState(false)
 
   if (!contract) notFound()
   // ponytail: notFound() returns never but TS doesn't narrow through it — non-null assert is correct here
@@ -42,29 +72,36 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   const revisionIdx = c.milestones.findIndex(m => m.status === 'revision_requested')
   const activeIdx = c.milestones.findIndex(m => m.status === 'active')
 
-  const actionMilestoneId = submittedIdx !== -1 ? submittedIdx
-    : revisionIdx !== -1 ? revisionIdx
+  // Bug 3 fix: revision_requested checked before submitted so freelancer sees pending revision first
+  const actionMilestoneId = revisionIdx !== -1 ? revisionIdx
+    : submittedIdx !== -1 ? submittedIdx
     : activeIdx
 
   const activeMilestone = actionMilestoneId !== -1 ? c.milestones[actionMilestoneId] : null
 
   async function handleSubmitWork() {
     if (!address) return
-    const proofUrl = prompt('Enter proof URL (GitHub link, Figma, etc):')
-    const trimmedUrl = proofUrl?.trim() ?? ''
+    const trimmedUrl = proofUrl.trim()
     if (!trimmedUrl) return
+    setActing(true)
+    setError(null)
     try {
       const { submitMilestone } = await import('@/lib/contracts')
       await submitMilestone(address, actionMilestoneId, trimmedUrl)
-      alert('Work submitted!')
+      setSuccessMsg('Work submitted!')
+      setProofOpen(false)
+      setProofUrl('')
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Transaction failed')
+      setError(e instanceof Error ? e.message : 'Transaction failed')
+    } finally {
+      setActing(false)
     }
   }
 
   async function handleApprove() {
     if (!address) return
     setError(null)
+    setActing(true)
     try {
       const { approveMilestone, releaseEscrow } = await import('@/lib/contracts')
       await approveMilestone(address, actionMilestoneId)
@@ -79,10 +116,12 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
       if (isLast) {
         setReviewOpen(true)
       } else {
-        alert('Milestone approved and escrow released!')
+        setSuccessMsg('Milestone approved and escrow released!')
       }
     } catch (e) {
       setError(String(e))
+    } finally {
+      setActing(false)
     }
   }
 
@@ -98,7 +137,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
       if (isLast) {
         setReviewOpen(true)
       } else {
-        alert('Escrow released!')
+        setSuccessMsg('Escrow released!')
       }
     } catch (e) {
       setError(String(e))
@@ -109,27 +148,32 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
   async function handleRequestRevision() {
     if (!address || !revisionFeedback.trim()) return
+    setActing(true)
+    setError(null)
     try {
       const { requestRevision } = await import('@/lib/contracts')
       await requestRevision(address, actionMilestoneId, revisionFeedback.trim())
-      alert('Revision requested!')
+      setSuccessMsg('Revision requested!')
       setRevisionOpen(false)
       setRevisionFeedback('')
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Transaction failed')
+      setError(e instanceof Error ? e.message : 'Transaction failed')
+    } finally {
+      setActing(false)
     }
   }
 
   async function handleDispute() {
     if (!address) return
-    if (!window.confirm('Are you sure? Disputes are irreversible.')) return
+    setDisputeConfirmOpen(false)
     setActing(true)
+    setError(null)
     try {
       const { disputeMilestone } = await import('@/lib/contracts')
       await disputeMilestone(address, actionMilestoneId)
-      alert('Dispute raised!')
+      setSuccessMsg('Dispute raised!')
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Transaction failed')
+      setError(e instanceof Error ? e.message : 'Transaction failed')
     } finally {
       setActing(false)
     }
@@ -176,14 +220,25 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/8 p-4">
               <p className="text-xs font-mono uppercase tracking-widest text-amber-400/70 mb-2">Revision Requested</p>
               <p className="text-white/80 text-sm leading-relaxed">{activeMilestone.revision_feedback}</p>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSubmitWork}
-                className="mt-3 border-amber-500/40 text-amber-300 hover:bg-amber-500/10"
-              >
-                Resubmit Work
-              </Button>
+              {proofOpen ? (
+                <div className="mt-3 space-y-2">
+                  <input
+                    type="url"
+                    value={proofUrl}
+                    onChange={e => setProofUrl(e.target.value)}
+                    placeholder="GitHub link, Figma, etc."
+                    className="w-full rounded-md bg-white/5 border border-white/10 text-white/80 placeholder:text-white/30 text-sm px-3 py-2 focus:outline-none focus:border-amber-500/40"
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={handleSubmitWork} disabled={acting || !proofUrl.trim()} className="flex-1 border-amber-500/40 text-amber-300 hover:bg-amber-500/10">Submit</Button>
+                    <Button size="sm" variant="outline" onClick={() => { setProofOpen(false); setProofUrl('') }} className="flex-1 border-white/10 text-white/40 hover:bg-white/5">Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" onClick={() => setProofOpen(true)} disabled={acting} className="mt-3 border-amber-500/40 text-amber-300 hover:bg-amber-500/10">
+                  Resubmit Work
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -213,6 +268,11 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             </CardContent>
           </Card>
 
+          {/* Bug 4 fix: show connect hint when wallet not connected */}
+          {!me && (
+            <p className="text-xs text-white/40 font-mono text-center py-2">Connect wallet to take actions</p>
+          )}
+
           {(isFreelancer || isClient) && (
             <Card className="glass">
               <CardHeader className="pb-3">
@@ -221,6 +281,9 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               <CardContent className="space-y-2">
                 {error && (
                   <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">{error}</p>
+                )}
+                {successMsg && (
+                  <p className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded px-3 py-2">{successMsg}</p>
                 )}
 
                 {needsRetryRelease && (
@@ -237,9 +300,25 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
                 {/* Freelancer: submit when milestone is active (not revision — that's in the feedback card) */}
                 {isFreelancer && activeMilestone?.status === 'active' && (
-                  <Button size="sm" variant="tile" onClick={handleSubmitWork} className="w-full font-semibold">
-                    Submit Work
-                  </Button>
+                  proofOpen ? (
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={proofUrl}
+                        onChange={e => setProofUrl(e.target.value)}
+                        placeholder="GitHub link, Figma, etc."
+                        className="w-full rounded-md bg-white/5 border border-white/10 text-white/80 placeholder:text-white/30 text-sm px-3 py-2 focus:outline-none focus:border-white/30"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="tile" onClick={handleSubmitWork} disabled={acting || !proofUrl.trim()} className="flex-1 font-semibold">Submit</Button>
+                        <Button size="sm" variant="outline" onClick={() => { setProofOpen(false); setProofUrl('') }} className="flex-1 border-white/10 text-white/40 hover:bg-white/5">Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="tile" onClick={() => setProofOpen(true)} disabled={acting} className="w-full font-semibold">
+                      Submit Work
+                    </Button>
+                  )
                 )}
 
                 {/* Client: three actions when milestone is submitted */}
@@ -249,6 +328,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       size="sm"
                       variant="outline"
                       onClick={handleApprove}
+                      disabled={acting}
                       className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
                     >
                       Approve
@@ -268,7 +348,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                             size="sm"
                             variant="outline"
                             onClick={handleRequestRevision}
-                            disabled={!revisionFeedback.trim()}
+                            disabled={acting || !revisionFeedback.trim()}
                             className="flex-1 border-amber-500/40 text-amber-300 hover:bg-amber-500/10"
                           >
                             Send
@@ -294,15 +374,26 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       </Button>
                     )}
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleDispute}
-                      disabled={acting}
-                      className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
-                    >
-                      Dispute
-                    </Button>
+                    {/* Bug 2 fix: inline confirm instead of window.confirm */}
+                    {disputeConfirmOpen ? (
+                      <div className="rounded-md border border-red-500/30 bg-red-500/8 p-3 space-y-2">
+                        <p className="text-xs text-red-400">Disputes are irreversible. Continue?</p>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={handleDispute} disabled={acting} className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10">Confirm</Button>
+                          <Button size="sm" variant="outline" onClick={() => setDisputeConfirmOpen(false)} className="flex-1 border-white/10 text-white/40 hover:bg-white/5">Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDisputeConfirmOpen(true)}
+                        disabled={acting}
+                        className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10"
+                      >
+                        Dispute
+                      </Button>
+                    )}
                   </>
                 )}
               </CardContent>

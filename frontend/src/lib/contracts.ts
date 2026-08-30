@@ -31,7 +31,7 @@ async function invoke(
   contractId: string,
   method: string,
   args: xdr.ScVal[]
-): Promise<rpc.Api.GetTransactionResponse> {
+): Promise<rpc.Api.GetSuccessfulTransactionResponse> {
   if (!contractId) throw new Error('Contract address not configured. Check environment variables.')
   const contract = new Contract(contractId)
   const account = await server.loadAccount(sourceAddress)

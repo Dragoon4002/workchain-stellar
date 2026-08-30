@@ -114,8 +114,8 @@ function MilestoneCard({ vaultId, idx, data, isOwner, isParticipant, onAction, n
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2 mt-3">
-        {/* Submit — participant or owner, state pending/disputed */}
-        {(isParticipant || isOwner) && (state === 0 || state === 3) && (
+        {/* Submit — participant only, state pending/revision-requested */}
+        {isParticipant && (state === 0 || state === 3) && (
           <div className="flex gap-2 items-center w-full">
             <Input
               placeholder="Proof URL"
@@ -189,10 +189,15 @@ export default function ProjectDetailPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [milestones, setMilestones] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [nowSecs, setNowSecs] = useState(Math.floor(Date.now() / 1000))
 
   const load = useCallback(async () => {
     if (!address || isNaN(vaultId)) { setLoading(false); return }
+    // Bug 3 fix: reset state before fetch so stale address context doesn't flash
+    setVault(null)
+    setMilestones([])
+    setLoadError(null)
     setLoading(true)
     try {
       const vaultData = await getVault(address, vaultId)
@@ -205,6 +210,8 @@ export default function ProjectDetailPage() {
       setMilestones(ms)
     } catch (err) {
       console.error(err)
+      // Bug 1 fix: surface load errors distinctly from 'not found'
+      setLoadError(err instanceof Error ? err.message : 'Failed to load project')
     } finally {
       setLoading(false)
     }
@@ -236,6 +243,14 @@ export default function ProjectDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh] text-white/30 font-mono text-sm">
         Loading…
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] text-red-400 font-mono text-sm">
+        Failed to load project — check your connection
       </div>
     )
   }

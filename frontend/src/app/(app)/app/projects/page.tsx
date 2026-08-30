@@ -47,12 +47,17 @@ export default function ProjectsPage() {
   useEffect(() => {
     if (!address) return
     const ids = getVaultIds(address)
-    if (ids.length === 0) return
-
     setLoading(true)
-    Promise.all(ids.map((id) => getVault(address, id).then((data) => ({ id, data }))))
-      .then(setVaults)
-      .catch(console.error)
+    if (ids.length === 0) { setLoading(false); return }
+
+    Promise.allSettled(ids.map((id) => getVault(address, id).then((data) => ({ id, data }))))
+      .then((results) =>
+        setVaults(
+          results
+            .filter((r): r is PromiseFulfilledResult<VaultSummary> => r.status === 'fulfilled')
+            .map((r) => r.value)
+        )
+      )
       .finally(() => setLoading(false))
   }, [address])
 

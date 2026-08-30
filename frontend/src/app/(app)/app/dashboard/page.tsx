@@ -139,10 +139,38 @@ const soonestDeadline = MOCK_JOBS
   .filter(j => j.status === 'in_progress')
   .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())[0]
 
+// ponytail: mock rep scores keyed by address; replace with on-chain fetch when available
+const MOCK_REP_SCORES: Record<string, number> = {
+  'GBfreelancer_ADDRESS_MOCK': 4.7,
+  'GCLIENT_ADDRESS_MOCK': 4.2,
+}
+
 // ── Shared header ─────────────────────────────────────────────────────────────
 
-function SharedHeader({ disputes }: { disputes: number }) {
-  const balance = totalLocked
+function SharedHeader() {
+  const { address } = useWalletStore()
+
+  if (!address) {
+    return (
+      <div className="glass rounded-2xl p-5 flex items-center gap-3 text-white/40 text-sm">
+        <Lock className="w-4 h-4" />
+        Connect your wallet to see your dashboard stats.
+      </div>
+    )
+  }
+
+  const myContracts = MOCK_CONTRACTS.filter(
+    c => c.freelancerAddress === address || c.clientAddress === address
+  )
+  const myClaimableXLM = myContracts
+    .flatMap(c => c.milestones)
+    .filter(m => m.status === 'approved')
+    .reduce((s, m) => s + m.amount, 0)
+  const myLocked = myContracts.reduce((s, c) => s + c.lockedAmount, 0)
+  const myDisputes = myContracts.filter(c => c.status === 'disputed').length
+  // ponytail: mock rep; replace with on-chain lookup when reputation contract is queryable
+  const repScore = MOCK_REP_SCORES[address] ?? '—'
+
   return (
     <div className="glass rounded-2xl p-5">
       <div className="flex items-center gap-6 flex-wrap">
@@ -152,7 +180,7 @@ function SharedHeader({ disputes }: { disputes: number }) {
           </div>
           <div>
             <p className="text-xs text-white/30">Wallet Balance</p>
-            <p className="text-lg font-bold font-mono text-white">{balance.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
+            <p className="text-lg font-bold font-mono text-white">{myLocked.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
           </div>
         </div>
         <div className="w-px h-10 bg-white/8" />
@@ -162,7 +190,7 @@ function SharedHeader({ disputes }: { disputes: number }) {
           </div>
           <div>
             <p className="text-xs text-white/30">Claimable Now</p>
-            <p className="text-lg font-bold font-mono text-emerald-400">{claimableXLM.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
+            <p className="text-lg font-bold font-mono text-emerald-400">{myClaimableXLM.toLocaleString()} <span className="text-xs text-white/40">XLM</span></p>
           </div>
         </div>
         <div className="w-px h-10 bg-white/8" />
@@ -172,16 +200,16 @@ function SharedHeader({ disputes }: { disputes: number }) {
           </div>
           <div>
             <p className="text-xs text-white/30">Rep Score</p>
-            <p className="text-lg font-bold text-purple-400">4.7</p>
+            <p className="text-lg font-bold text-purple-400">{repScore}</p>
           </div>
         </div>
-        {disputes > 0 && (
+        {myDisputes > 0 && (
           <>
             <div className="w-px h-10 bg-white/8" />
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/15 text-red-400 text-sm font-semibold">
                 <XCircle className="w-4 h-4" />
-                {disputes} Active {disputes === 1 ? 'Dispute' : 'Disputes'}
+                {myDisputes} Active {myDisputes === 1 ? 'Dispute' : 'Disputes'}
               </span>
             </div>
           </>
@@ -195,8 +223,17 @@ function SharedHeader({ disputes }: { disputes: number }) {
 
 function FreelancerTab() {
   const { address } = useWalletStore()
-  const me = address ?? 'GYOUR_ADDRESS_HERE'
 
+  if (!address) {
+    return (
+      <div className="glass rounded-2xl p-6 flex items-center gap-3 text-white/40 text-sm">
+        <Lock className="w-4 h-4" />
+        Connect your wallet to see your freelancer dashboard.
+      </div>
+    )
+  }
+
+  const me = address
   const myFreelancerContracts = MOCK_CONTRACTS.filter(c => c.freelancerAddress === me)
   const mySubmittedMilestones = myFreelancerContracts.flatMap(c =>
     c.milestones.filter(m => m.status === 'submitted').map(m => ({ ...m, contractId: c.id, jobTitle: c.jobTitle }))
@@ -328,7 +365,7 @@ function FreelancerTab() {
       {/* 4. Earnings chart */}
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-white font-semibold text-sm">Earnings Overview</span>
+          <span className="text-white font-semibold text-sm">Earnings Overview <span className="text-xs text-white/30 font-normal ml-1">(demo data)</span></span>
           <div className="flex items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#dddddd] inline-block" /> Active 40%</span>
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-400 inline-block" /> Pending 30%</span>
@@ -355,8 +392,17 @@ function FreelancerTab() {
 
 function ClientTab() {
   const { address } = useWalletStore()
-  const me = address ?? 'GYOUR_ADDRESS_HERE'
 
+  if (!address) {
+    return (
+      <div className="glass rounded-2xl p-6 flex items-center gap-3 text-white/40 text-sm">
+        <Lock className="w-4 h-4" />
+        Connect your wallet to see your client dashboard.
+      </div>
+    )
+  }
+
+  const me = address
   const myClientContracts = MOCK_CONTRACTS.filter(c => c.clientAddress === me)
   const myApprovableMillestones = myClientContracts.flatMap(c =>
     c.milestones.filter(m => m.status === 'submitted').map(m => ({ ...m, contractId: c.id, jobTitle: c.jobTitle }))
@@ -471,7 +517,7 @@ function ClientTab() {
       {/* 4. Spend chart */}
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-white font-semibold text-sm">Spend Overview</span>
+          <span className="text-white font-semibold text-sm">Spend Overview <span className="text-xs text-white/30 font-normal ml-1">(demo data)</span></span>
           <span className="text-xs text-white/30">Monthly XLM</span>
         </div>
         <div className="flex gap-3">
@@ -498,7 +544,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen p-6 space-y-4">
       {/* Shared header */}
-      <SharedHeader disputes={disputedContracts.length} />
+      <SharedHeader />
 
       {/* Tab pills */}
       <SlidingTabs
