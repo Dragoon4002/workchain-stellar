@@ -1,35 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { Redis } from '@upstash/redis'
 
-const FILE = path.join(process.cwd(), 'data', 'feedback.json')
-
-async function readData() {
-  try {
-    return JSON.parse(await fs.readFile(FILE, 'utf8'))
-  } catch {
-    return { entries: [] }
-  }
-}
+const redis = Redis.fromEnv()
+const KEY = 'wc:feedback:entries'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const data = await readData()
-  data.entries.push({
+  const entry = {
     id: Date.now(),
     ts: new Date().toISOString(),
-    type: body.type ?? 'feedback',     // 'feedback' | 'error'
+    type: body.type ?? 'feedback',
     rating: body.rating ?? null,
     message: body.message ?? '',
     wallet: body.wallet ?? null,
     page: body.page ?? null,
     error: body.error ?? null,
-  })
-  await fs.mkdir(path.dirname(FILE), { recursive: true })
-  await fs.writeFile(FILE, JSON.stringify(data, null, 2))
+  }
+  await redis.lpush(KEY, JSON.stringify(entry))
   return NextResponse.json({ ok: true })
 }
 
 export async function GET() {
-  return NextResponse.json(await readData())
+  const raw = await redis.lrange(KEY, 0, -1)
+  const entries = (raw ?? []).map(v => typeof v === 'string' ? JSON.parse(v) : v)
+  return NextResponse.json({ entries })
 }

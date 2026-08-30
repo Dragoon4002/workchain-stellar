@@ -1,45 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { Redis } from '@upstash/redis'
 
-const FILE = path.join(process.cwd(), 'data', 'analytics.json')
-
-async function readData() {
-  try {
-    const raw = await fs.readFile(FILE, 'utf8')
-    return JSON.parse(raw)
-  } catch {
-    return { pageViews: [], wallets: {}, totalEvents: 0 }
-  }
-}
-
-async function writeData(data: object) {
-  await fs.mkdir(path.dirname(FILE), { recursive: true })
-  await fs.writeFile(FILE, JSON.stringify(data, null, 2))
-}
+const redis = Redis.fromEnv()
+const VIEWS_KEY = 'wc:analytics:pageViews'
+const WALLETS_KEY = 'wc:analytics:wallets'
+const TOTAL_KEY = 'wc:analytics:totalEvents'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const data = await readData()
-  data.totalEvents = (data.totalEvents ?? 0) + 1
+  await redis.incr(TOTAL_KEY)
 
   if (body.type === 'pageview') {
-    data.pageViews.push({ path: body.path, wallet: body.wallet ?? null, ts: Date.now() })
-    if (data.pageViews.length > 5000) data.pageViews = data.pageViews.slice(-5000)
+    const entry = { path: body.path, wallet: body.wallet ?? null, ts: Date.now() }
+    await redis.lpush(VIEWS_KEY, JSON.stringify(entry))
+    await redis.ltrim(VIEWS_KEY, 0, 4999)
   } else if (body.type === 'wallet') {
-    const addr = body.address
-    const existing = data.wallets[addr]
+    const addr = body.address as string
     const now = Date.now()
-    data.wallets[addr] = existing
+    const raw = await redis.hget<string>(WALLETS_KEY, addr)
+    const existing = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : null
+    const updated = existing
       ? { ...existing, lastSeen: now, visits: existing.visits + 1 }
       : { address: addr, firstSeen: now, lastSeen: now, visits: 1 }
+    await redis.hset(WALLETS_KEY, { [addr]: JSON.stringify(updated) })
   }
 
-  await writeData(data)
   return NextResponse.json({ ok: true })
 }
 
 export async function GET() {
-  const data = await readData()
-  return NextResponse.json(data)
+  const [rawViews, rawWallets, totalEvents] = await Promise.all([
+    redis.lrange(VIEWS_KEY, 0, -1),
+    redis.hgetall(WALLETS_KEY),
+    redis.get<number>(TOTAL_KEY),
+  ])
+
+  const pageViews = (rawViews ?? []).map(v => typeof v === 'string' ? JSON.parse(v) : v)
+  const wallets: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(rawWallets ?? {})) {
+    wallets[k] = typeof v === 'string' ? JSON.parse(v) : v
+  }
+
+  return NextResponse.json({ pageViews, wallets, totalEvents: totalEvents ?? 0 })
 }
