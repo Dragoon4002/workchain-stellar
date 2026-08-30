@@ -147,8 +147,12 @@ function LogOutButton() {
   )
 }
 
+const ADMIN_WALLET = process.env.NEXT_PUBLIC_DEPLOYER ?? ''
+
 export function AppSidebar() {
   const { address } = useWalletStore()
+  const isAdmin = !!address && address === ADMIN_WALLET
+  const visibleNav = NAV.filter(({ section }) => section !== 'DevOps' || isAdmin)
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[20vw] flex flex-col z-40 bg-[#161616] border-r border-white/6">
@@ -165,7 +169,7 @@ export function AppSidebar() {
       {/* Nav */}
       <LayoutGroup>
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
-          {NAV.map(({ section, items }) => (
+          {visibleNav.map(({ section, items }) => (
             <div key={section}>
               <p className="px-3 mb-2 text-xs font-medium text-white/40 tracking-wide">{section}</p>
               <div className="space-y-1">

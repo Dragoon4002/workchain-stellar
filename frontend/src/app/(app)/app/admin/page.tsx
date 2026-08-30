@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { notFound } from 'next/navigation'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { Users, Eye, MessageSquare, AlertTriangle, TrendingUp, Activity } from 'lucide-react'
@@ -56,15 +57,11 @@ export default function AdminPage() {
 
   if (!wallet) return (
     <div className="flex items-center justify-center min-h-[60vh] text-white/30 font-mono text-sm">
-      Connect your wallet to access admin.
+      Connect your wallet to continue.
     </div>
   )
 
-  if (wallet !== ADMIN_WALLET) return (
-    <div className="flex items-center justify-center min-h-[60vh] text-red-400 font-mono text-sm">
-      Access denied.
-    </div>
-  )
+  if (wallet !== ADMIN_WALLET) return notFound()
 
   const wallets = Object.values(analytics?.wallets ?? {}).sort((a, b) => b.lastSeen - a.lastSeen)
   const pages = pathCounts(analytics?.pageViews ?? [])
