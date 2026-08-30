@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { shortenAddress } from '@/lib/wallet'
+import { useWalletStore } from '@/store/wallet'
 import { Users, Eye, MessageSquare, AlertTriangle, TrendingUp, Activity } from 'lucide-react'
 
 interface WalletEntry { address: string; firstSeen: number; lastSeen: number; visits: number }
@@ -39,15 +40,31 @@ function pathCounts(views: PageViewEntry[]): { path: string; count: number }[] {
   return Object.entries(map).map(([path, count]) => ({ path, count })).sort((a, b) => b.count - a.count)
 }
 
+const ADMIN_WALLET = process.env.NEXT_PUBLIC_DEPLOYER ?? ''
+
 export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [tab, setTab] = useState<'overview' | 'wallets' | 'pages' | 'feedback'>('overview')
+  const { address: wallet } = useWalletStore()
 
   useEffect(() => {
+    if (wallet !== ADMIN_WALLET) return
     fetch('/api/analytics').then(r => r.json()).then(setAnalytics).catch(() => {})
     fetch('/api/feedback').then(r => r.json()).then(setFeedback).catch(() => {})
-  }, [])
+  }, [wallet])
+
+  if (!wallet) return (
+    <div className="flex items-center justify-center min-h-[60vh] text-white/30 font-mono text-sm">
+      Connect your wallet to access admin.
+    </div>
+  )
+
+  if (wallet !== ADMIN_WALLET) return (
+    <div className="flex items-center justify-center min-h-[60vh] text-red-400 font-mono text-sm">
+      Access denied.
+    </div>
+  )
 
   const wallets = Object.values(analytics?.wallets ?? {}).sort((a, b) => b.lastSeen - a.lastSeen)
   const pages = pathCounts(analytics?.pageViews ?? [])
