@@ -7,6 +7,7 @@ import { MOCK_JOBS, MOCK_BIDS, MOCK_CONTRACTS, type Bid } from '@/lib/mock-data'
 import { shortenAddress } from '@/lib/wallet'
 import { useWalletStore } from '@/store/wallet'
 import { threadId, sendMessage } from '@/lib/messages'
+import { applyToJob } from '@/lib/contracts'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { SlidingTabs } from '@/components/ui/sliding-tabs'
@@ -102,6 +103,8 @@ function CTASidebar({ job, relationship, myBid, me }: {
   const [timeline, setTimeline] = useState('')
   const [reportOpen, setReportOpen] = useState(false)
   const [reportText, setReportText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [bidError, setBidError] = useState<string | null>(null)
 
   async function openOrCreateThread() {
     if (!me) return
@@ -248,19 +251,28 @@ function CTASidebar({ job, relationship, myBid, me }: {
                     className="bg-white/5 border-white/8 text-white placeholder:text-white/30"
                   />
                 </div>
+                {bidError && <p className="text-red-400 text-xs font-mono">{bidError}</p>}
                 <Button
-                  onClick={() => {
-                    if (!me) return
+                  disabled={submitting}
+                  onClick={async () => {
+                    if (!me || !proposal.trim()) return
+                    setBidError(null)
+                    setSubmitting(true)
                     try {
+                      await applyToJob(me, Number(job.id), proposal.trim())
                       const key = `workchain:bids:${me}`
                       const ids: string[] = JSON.parse(localStorage.getItem(key) ?? '[]')
                       if (!ids.includes(job.id)) { ids.push(job.id); localStorage.setItem(key, JSON.stringify(ids)) }
-                    } catch { /* ignore */ }
-                    console.log({ proposal, price, timeline, jobId: job.id })
+                      window.location.reload()
+                    } catch (e: unknown) {
+                      setBidError(e instanceof Error ? e.message : 'Bid failed')
+                    } finally {
+                      setSubmitting(false)
+                    }
                   }}
                   variant="tile" className="w-full font-semibold"
                 >
-                  Submit Bid
+                  {submitting ? 'Submitting…' : 'Submit Bid'}
                 </Button>
               </div>
             </SheetContent>
