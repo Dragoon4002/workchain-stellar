@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/tests/
+/test-results/
+playwright.config.ts
 
 # next.js
 /.next/
