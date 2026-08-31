@@ -56,8 +56,18 @@ Your Stellar wallet is your identity. No account, no email, no KYC.
 ### Freelancers / Reputation
 ![Reputation](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/reputation.png)
 
-### Contract Activity (Testnet)
-[Add Stellar Expert screenshots here]
+---
+
+## Transaction Proof
+
+### Escrow
+![Escrow](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/escrow-tx.png)
+
+### Job
+![Jobs](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/job-tx.png)
+
+### Milestones
+![Milestones](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/milestone-tx.png)
 
 ---
 
