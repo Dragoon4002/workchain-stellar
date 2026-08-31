@@ -237,7 +237,7 @@ stellar contract deploy \
 
 ## Demo Video
 
-[Link to video](https://drive.google.com/drive/folders/1DbCtkMPhPsqkSU0UmA2-uFZuQA4-Oyhe?usp=sharing)
+[Link to video](https://www.loom.com/share/8d0f34e3754e47b08edb3e8e90c205bd)
 
 **User feedback form:** [Google Form](https://forms.gle/76SAExk8xzzXtsSy6)
 
