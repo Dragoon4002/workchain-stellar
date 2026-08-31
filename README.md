@@ -1,10 +1,21 @@
 # WorkChain
 
-**Programmable Project Settlement Protocol on Stellar.**
+<p align="center">
+  <strong>Programmable Project Settlement Protocol Built on Stellar Soroban</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Blockchain-Stellar%20Soroban-08B5E5?style=for-the-badge&logo=stellar" alt="Stellar Soroban" />
+  <img src="https://img.shields.io/badge/Language-Rust%20%7C%20TypeScript-orange?style=for-the-badge&logo=rust" alt="Rust & TypeScript" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js%2016-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
+</p>
+
+> ⚠️ **EXPERIMENTAL — UNAUDITED — DO NOT USE WITH REAL FUNDS**
 
 Multi-party project treasuries with milestone-gated escrow, bps-based payment splits, and 72-hour auto-release timeout — all on Soroban smart contracts. No fees. No banks. No middlemen.
 
-Live: **[workchain.vercel.app](https://workchain.vercel.app)** · Network: Stellar Testnet · Contracts: Stellar Testnet
+Live: **[workchain-stellar.vercel.app](https://workchain-stellar.vercel.app)** · Network: Stellar Testnet · Contracts: Stellar Testnet
 
 ---
 
@@ -187,6 +198,24 @@ stellar contract deploy \
 ## User Onboarding
 
 We onboarded **50 testnet users** across 25 client/freelancer pairs. Each pair completed a full deposit + release cycle on the escrow contract, generating **50 real on-chain transactions** on Stellar Testnet.
+
+## Demo Video
+
+[Link to video](https://drive.google.com/drive/folders/1DbCtkMPhPsqkSU0UmA2-uFZuQA4-Oyhe?usp=sharing)
+
+---
+
+## Proof of Wallet Interactions
+
+[Wallet Interactions as a list](https://docs.google.com/spreadsheets/d/1FOrZb-3cEo-KOVdycoRBasgNoor70a5qXApVkXt7MwU/edit?usp=sharing)
+
+---
+
+## User Feedback Summary (CSV / Sheets)
+
+[Feedback Summary](https://docs.google.com/spreadsheets/d/1aguHA4OXy5-ZEcmY66OHQbw8gyT6-BQlb4Awn2EXI40/edit?usp=sharing)
+
+---
 
 **User feedback form:** [Google Form — link TBD]
 
