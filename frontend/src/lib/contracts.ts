@@ -241,12 +241,12 @@ export async function createVault(
     participants.map((p) =>
       xdr.ScVal.scvMap([
         new xdr.ScMapEntry({
-          key: nativeToScVal('wallet', { type: 'symbol' }),
-          val: new Address(p.wallet).toScVal(),
-        }),
-        new xdr.ScMapEntry({
           key: nativeToScVal('bps', { type: 'symbol' }),
           val: nativeToScVal(p.bps, { type: 'u32' }),
+        }),
+        new xdr.ScMapEntry({
+          key: nativeToScVal('wallet', { type: 'symbol' }),
+          val: new Address(p.wallet).toScVal(),
         }),
       ])
     )
