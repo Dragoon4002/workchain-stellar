@@ -39,6 +39,28 @@ Your Stellar wallet is your identity. No account, no email, no KYC.
 
 ---
 
+## Screenshots
+
+### Landing Page
+![Landing Page](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/landing.png)
+
+### Dashboard
+![Dashboard](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/dashboard.png)
+
+### Explore Jobs
+![Explore Jobs](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/jobs.png)
+
+### Contracts
+![Contracts](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/contracts.png)
+
+### Freelancers / Reputation
+![Reputation](https://raw.githubusercontent.com/Dragoon4002/workchain-stellar/main/frontend/public/screenshots/reputation.png)
+
+### Contract Activity (Testnet)
+[Add Stellar Expert screenshots here]
+
+---
+
 ## Architecture
 
 ```
@@ -217,9 +239,9 @@ We onboarded **50 testnet users** across 25 client/freelancer pairs. Each pair c
 
 ---
 
-**User feedback form:** [Google Form — link TBD]
+**User feedback form:** [Google Form](https://forms.gle/76SAExk8xzzXtsSy6)
 
-**Onboarding responses (wallet addresses, feedback, ratings):** [Google Sheets — link TBD]
+**Onboarding responses (wallet addresses, feedback, ratings):** [Google Sheets](https://docs.google.com/spreadsheets/d/15J7Ch8r2dmh-SEyQE5fELwO03RIz-xHo_SO6wrDsVs0/edit?usp=sharing)
 
 ### How to get testnet XLM
 
