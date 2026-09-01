@@ -96,7 +96,7 @@ function CTASidebar({ job, relationship, myBid, me }: {
   job: typeof MOCK_JOBS[0]
   relationship: Relationship
   myBid: Bid | undefined
-  me: string
+  me: string | null
 }) {
   const [proposal, setProposal] = useState('')
   const [price, setPrice] = useState('')
@@ -326,19 +326,16 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   if (!job) notFound()
 
-  // ponytail: fall back to mock address when wallet not connected, so UI is always meaningful
-  const me = address ?? 'GYOUR_ADDRESS_HERE'
-
   const bids = MOCK_BIDS.filter((b) => b.jobId === id)
-  const myBid = bids.find((b) => b.freelancerAddress === me)
-  const assignedContract = MOCK_CONTRACTS.find(
-    (c) => c.jobId === job.id && c.freelancerAddress === me && c.status === 'active'
-  )
+  const myBid = address ? bids.find((b) => b.freelancerAddress === address) : undefined
+  const assignedContract = address ? MOCK_CONTRACTS.find(
+    (c) => c.jobId === job.id && c.freelancerAddress === address && c.status === 'active'
+  ) : undefined
 
   const relationship: Relationship =
-    job.clientAddress === me ? 'owner'
-    : assignedContract        ? 'assigned'
-    : myBid                   ? 'bidder'
+    address && job.clientAddress === address ? 'owner'
+    : assignedContract                        ? 'assigned'
+    : myBid                                   ? 'bidder'
     : 'stranger'
 
   const [sort, setSort] = useState<'price' | 'rating' | 'newest'>('price')
@@ -468,7 +465,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
         {/* ── Sidebar ── */}
         <div>
-          <CTASidebar job={job} relationship={relationship} myBid={myBid} me={me} />
+          <CTASidebar job={job} relationship={relationship} myBid={myBid} me={address} />
         </div>
       </div>
 

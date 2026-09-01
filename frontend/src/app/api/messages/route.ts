@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
   }
 
   const msg: Msg = {
-    id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    id: `msg-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`,
     thread_id: body.thread_id,
     sender: body.sender,
     body: body.body,
